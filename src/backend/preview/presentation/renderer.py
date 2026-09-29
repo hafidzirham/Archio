@@ -9,10 +9,6 @@ from pathlib import Path
 import uno
 
 
-# ============================================================
-# CONFIG
-# ============================================================
-
 LIBREOFFICE_PATH = Path(
     r"C:\Program Files\LibreOffice\program\soffice.exe"
 )
@@ -32,10 +28,6 @@ SUPPORTED_EXTENSIONS = {
 }
 
 
-# ============================================================
-# LIBREOFFICE WORKER
-# ============================================================
-
 class PresentationRenderer:
 
     def __init__(self):
@@ -45,16 +37,19 @@ class PresentationRenderer:
 
         self.current_document = None
         self.current_file = None
+        self.current_file_signature = None
 
         self.profile_dir = None
         self.output_dir = None
 
+        self.slide_cache = {}
+
         self.start_libreoffice()
         self.connect()
 
-    # --------------------------------------------------------
-    # Start LibreOffice
-    # --------------------------------------------------------
+    # =========================================================
+    # LIBREOFFICE
+    # =========================================================
 
     def start_libreoffice(self):
 
@@ -92,23 +87,30 @@ class PresentationRenderer:
 
         self.process = subprocess.Popen(
             command,
+
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+
             creationflags=subprocess.CREATE_NO_WINDOW,
         )
 
-        self.log("LibreOffice starting...")
+        self.log(
+            "LibreOffice starting..."
+        )
 
-    # --------------------------------------------------------
-    # Connect UNO
-    # --------------------------------------------------------
+    # =========================================================
+    # UNO CONNECTION
+    # =========================================================
 
     def connect(self):
 
-        local_context = uno.getComponentContext()
+        local_context = (
+            uno.getComponentContext()
+        )
 
         resolver = (
-            local_context.ServiceManager
+            local_context
+            .ServiceManager
             .createInstanceWithContext(
                 "com.sun.star.bridge.UnoUrlResolver",
                 local_context,
@@ -121,13 +123,15 @@ class PresentationRenderer:
 
             try:
 
-                self.context = resolver.resolve(
-                    (
-                        f"uno:socket,"
-                        f"host={HOST},"
-                        f"port={PORT};"
-                        f"urp;"
-                        f"StarOffice.ComponentContext"
+                self.context = (
+                    resolver.resolve(
+                        (
+                            f"uno:socket,"
+                            f"host={HOST},"
+                            f"port={PORT};"
+                            f"urp;"
+                            f"StarOffice.ComponentContext"
+                        )
                     )
                 )
 
@@ -136,29 +140,36 @@ class PresentationRenderer:
             except Exception as error:
 
                 last_error = error
+
                 time.sleep(0.1)
 
         else:
 
             raise RuntimeError(
-                f"Gagal terhubung ke LibreOffice UNO: "
+                "Gagal terhubung ke LibreOffice UNO: "
                 f"{last_error}"
             )
 
         self.desktop = (
-            self.context.ServiceManager
+            self.context
+            .ServiceManager
             .createInstanceWithContext(
                 "com.sun.star.frame.Desktop",
                 self.context,
             )
         )
 
-        self.log("UNO connected")
-        self.log("Desktop ready")
+        self.log(
+            "UNO connected"
+        )
 
-    # --------------------------------------------------------
-    # Logging
-    # --------------------------------------------------------
+        self.log(
+            "Desktop ready"
+        )
+
+    # =========================================================
+    # LOG
+    # =========================================================
 
     @staticmethod
     def log(message):
@@ -169,9 +180,31 @@ class PresentationRenderer:
             flush=True,
         )
 
-    # --------------------------------------------------------
-    # Close current document
-    # --------------------------------------------------------
+    # =========================================================
+    # FILE SIGNATURE
+    # =========================================================
+
+    @staticmethod
+    def file_signature(path: Path):
+
+        stat = path.stat()
+
+        return (
+            stat.st_mtime_ns,
+            stat.st_size,
+        )
+
+    # =========================================================
+    # CLEAR CACHE
+    # =========================================================
+
+    def clear_file_cache(self):
+
+        self.slide_cache.clear()
+
+    # =========================================================
+    # CLOSE CURRENT DOCUMENT
+    # =========================================================
 
     def close_current_document(self):
 
@@ -189,32 +222,52 @@ class PresentationRenderer:
 
         self.current_document = None
         self.current_file = None
+        self.current_file_signature = None
 
-    # --------------------------------------------------------
-    # Open presentation
-    # --------------------------------------------------------
+    # =========================================================
+    # OPEN PRESENTATION
+    # =========================================================
 
     def open_presentation(
         self,
         file_path: Path,
     ):
 
-        # Same presentation already open
+        signature = (
+            self.file_signature(
+                file_path
+            )
+        )
+
+        # -----------------------------------------------------
+        # File masih sama → jangan buka ulang LibreOffice
+        # -----------------------------------------------------
+
         if (
             self.current_document is not None
             and self.current_file == file_path
+            and self.current_file_signature
+            == signature
         ):
+
             return 0.0
 
-        # Close previous presentation
+        # -----------------------------------------------------
+        # File berbeda
+        # -----------------------------------------------------
+
         self.close_current_document()
+
+        self.clear_file_cache()
 
         self.log(
             f"Opening: {file_path.name}"
         )
 
-        input_url = uno.systemPathToFileUrl(
-            str(file_path)
+        input_url = (
+            uno.systemPathToFileUrl(
+                str(file_path)
+            )
         )
 
         start = time.perf_counter()
@@ -229,7 +282,8 @@ class PresentationRenderer:
         )
 
         elapsed = (
-            time.perf_counter() - start
+            time.perf_counter()
+            - start
         )
 
         if document is None:
@@ -241,6 +295,7 @@ class PresentationRenderer:
 
         self.current_document = document
         self.current_file = file_path
+        self.current_file_signature = signature
 
         self.log(
             f"OPEN: {elapsed:.3f}s"
@@ -248,9 +303,9 @@ class PresentationRenderer:
 
         return elapsed
 
-    # --------------------------------------------------------
-    # Get slide count
-    # --------------------------------------------------------
+    # =========================================================
+    # SLIDE COUNT
+    # =========================================================
 
     def get_slide_count(self):
 
@@ -260,16 +315,15 @@ class PresentationRenderer:
                 "Tidak ada presentation yang terbuka."
             )
 
-        pages = (
+        return (
             self.current_document
             .getDrawPages()
+            .getCount()
         )
 
-        return pages.getCount()
-
-    # --------------------------------------------------------
-    # Render slide
-    # --------------------------------------------------------
+    # =========================================================
+    # RENDER SLIDE
+    # =========================================================
 
     def render_slide(
         self,
@@ -282,12 +336,58 @@ class PresentationRenderer:
                 "Tidak ada presentation yang terbuka."
             )
 
+        signature = (
+            self.current_file_signature
+        )
+
+        cache_key = (
+            str(self.current_file),
+            signature,
+            slide_index,
+        )
+
+        cached_path = (
+            self.slide_cache.get(
+                cache_key
+            )
+        )
+
+        # -----------------------------------------------------
+        # CACHE HIT
+        # -----------------------------------------------------
+
+        if (
+            cached_path
+            and cached_path.exists()
+            and cached_path.stat().st_size > 0
+        ):
+
+            self.log(
+                f"SLIDE {slide_index + 1} CACHE HIT"
+            )
+
+            image_bytes = (
+                cached_path.read_bytes()
+            )
+
+            return {
+                "index": slide_index,
+
+                "image":
+                    "data:image/png;base64,"
+                    + base64.b64encode(
+                        image_bytes
+                    ).decode("ascii"),
+            }
+
         pages = (
             self.current_document
             .getDrawPages()
         )
 
-        total_slides = pages.getCount()
+        total_slides = (
+            pages.getCount()
+        )
 
         if total_slides <= 0:
 
@@ -302,11 +402,14 @@ class PresentationRenderer:
 
             raise ValueError(
                 f"Slide index {slide_index} "
-                f"di luar range 0-{total_slides - 1}."
+                f"di luar range "
+                f"0-{total_slides - 1}."
             )
 
-        slide = pages.getByIndex(
-            slide_index
+        slide = (
+            pages.getByIndex(
+                slide_index
+            )
         )
 
         controller = (
@@ -314,21 +417,24 @@ class PresentationRenderer:
             .getCurrentController()
         )
 
-        # Select requested slide
         controller.setCurrentPage(
             slide
         )
 
-        # Temporary output
+        # -----------------------------------------------------
+        # TEMP OUTPUT
+        # -----------------------------------------------------
+
         output_file = (
             self.output_dir
-            / "current-slide.png"
+            / f"slide_{slide_index}.png"
         )
 
         if output_file.exists():
 
             try:
                 output_file.unlink()
+
             except Exception:
                 pass
 
@@ -344,7 +450,10 @@ class PresentationRenderer:
             )
         )
 
-        filter_property.Name = "FilterName"
+        filter_property.Name = (
+            "FilterName"
+        )
+
         filter_property.Value = (
             "impress_png_Export"
         )
@@ -368,33 +477,58 @@ class PresentationRenderer:
                 "PNG slide."
             )
 
-        image_bytes = (
-            output_file.read_bytes()
+        # -----------------------------------------------------
+        # CACHE FILE
+        # -----------------------------------------------------
+
+        cache_file = (
+            self.output_dir
+            / f"cache_{slide_index}.png"
         )
 
-        image_base64 = (
-            base64.b64encode(
-                image_bytes
-            ).decode("ascii")
+        if cache_file != output_file:
+
+            try:
+
+                cache_file.write_bytes(
+                    output_file.read_bytes()
+                )
+
+            except Exception:
+
+                cache_file = output_file
+
+        self.slide_cache[
+            cache_key
+        ] = cache_file
+
+        image_bytes = (
+            cache_file.read_bytes()
         )
 
         self.log(
-            f"SLIDE {slide_index + 1}/"
-            f"{total_slides} "
-            f"EXPORT: {export_time:.3f}s"
+            (
+                f"SLIDE "
+                f"{slide_index + 1}/"
+                f"{total_slides} "
+                f"EXPORT: "
+                f"{export_time:.3f}s"
+            )
         )
 
         return {
             "index": slide_index,
-            "image": (
+
+            "image":
                 "data:image/png;base64,"
-                + image_base64
-            ),
+                + base64.b64encode(
+                    image_bytes
+                ).decode("ascii"),
         }
 
-    # --------------------------------------------------------
-    # Render request
-    # --------------------------------------------------------
+    # =========================================================
+    # RENDER
+    # =========================================================
 
     def render(
         self,
@@ -402,7 +536,9 @@ class PresentationRenderer:
         slide_index: int = 0,
     ):
 
-        path = Path(file_path)
+        path = Path(
+            file_path
+        )
 
         if not path.exists():
 
@@ -414,14 +550,16 @@ class PresentationRenderer:
             path.suffix.lower()
         )
 
-        if extension not in SUPPORTED_EXTENSIONS:
+        if (
+            extension
+            not in SUPPORTED_EXTENSIONS
+        ):
 
             raise ValueError(
-                f"Format presentation tidak "
-                f"didukung: {extension}"
+                "Format presentation "
+                f"tidak didukung: {extension}"
             )
 
-        # Create output directory once
         if self.output_dir is None:
 
             self.output_dir = Path(
@@ -435,15 +573,19 @@ class PresentationRenderer:
         )
 
         open_time = (
-            self.open_presentation(path)
+            self.open_presentation(
+                path
+            )
         )
 
         total_slides = (
             self.get_slide_count()
         )
 
-        slide = self.render_slide(
-            slide_index
+        slide = (
+            self.render_slide(
+                slide_index
+            )
         )
 
         total_time = (
@@ -451,37 +593,39 @@ class PresentationRenderer:
             - total_start
         )
 
-        result = {
+        return {
 
-            "fileName": path.name,
+            "fileName":
+                path.name,
 
-            "extension": extension,
+            "extension":
+                extension,
 
-            "totalSlides": total_slides,
+            "totalSlides":
+                total_slides,
 
-            "slides": [
-                slide
-            ],
+            "slides":
+                [slide],
 
             "benchmark": {
 
-                "open": round(
-                    open_time,
-                    4,
-                ),
+                "open":
+                    round(
+                        open_time,
+                        4,
+                    ),
 
-                "total": round(
-                    total_time,
-                    4,
-                ),
+                "total":
+                    round(
+                        total_time,
+                        4,
+                    ),
             },
         }
 
-        return result
-
-    # --------------------------------------------------------
-    # Shutdown
-    # --------------------------------------------------------
+    # =========================================================
+    # SHUTDOWN
+    # =========================================================
 
     def shutdown(self):
 
@@ -518,9 +662,9 @@ class PresentationRenderer:
         )
 
 
-# ============================================================
-# WORKER LOOP
-# ============================================================
+# =============================================================
+# MAIN
+# =============================================================
 
 def main():
 
@@ -535,10 +679,6 @@ def main():
         renderer.log(
             "Worker ready"
         )
-
-        # ----------------------------------------------------
-        # Read JSON request line-by-line
-        # ----------------------------------------------------
 
         for line in sys.stdin:
 
@@ -558,9 +698,9 @@ def main():
                     "render",
                 )
 
-                # --------------------------------------------
-                # Shutdown
-                # --------------------------------------------
+                # -------------------------------------------------
+                # SHUTDOWN
+                # -------------------------------------------------
 
                 if command == "shutdown":
 
@@ -579,19 +719,24 @@ def main():
 
                     break
 
-                # --------------------------------------------
-                # Render
-                # --------------------------------------------
+                # -------------------------------------------------
+                # UNKNOWN COMMAND
+                # -------------------------------------------------
 
                 if command != "render":
 
                     raise ValueError(
-                        f"Unknown command: "
-                        f"{command}"
+                        f"Unknown command: {command}"
                     )
 
-                file_path = request.get(
-                    "filePath"
+                # -------------------------------------------------
+                # FILE PATH
+                # -------------------------------------------------
+
+                file_path = (
+                    request.get(
+                        "filePath"
+                    )
                 )
 
                 if not file_path:
@@ -607,6 +752,10 @@ def main():
                     )
                 )
 
+                # -------------------------------------------------
+                # RENDER
+                # -------------------------------------------------
+
                 result = renderer.render(
                     file_path,
                     slide_index,
@@ -619,9 +768,11 @@ def main():
 
             except Exception as error:
 
-                renderer.log(
-                    f"ERROR: {error}"
-                )
+                if renderer is not None:
+
+                    renderer.log(
+                        f"ERROR: {error}"
+                    )
 
                 response = {
                     "success": False,
@@ -640,7 +791,6 @@ def main():
             )
 
     except KeyboardInterrupt:
-
         pass
 
     except Exception as error:
@@ -657,10 +807,6 @@ def main():
 
             renderer.shutdown()
 
-
-# ============================================================
-# ENTRY POINT
-# ============================================================
 
 if __name__ == "__main__":
     main()

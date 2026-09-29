@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import Home from "./pages/Home";
 import Sorting from "./pages/Sorting";
@@ -8,12 +11,19 @@ import {
   moveFile,
 } from "./services/fileService";
 
-import { pickFolder } from "./services/folderService";
+import {
+  pickFolder,
+} from "./services/folderService";
 
-import type { FileMetadata } from "./types/file";
+import ThemeToggle from "./components/sorting/ThemeToggle";
+
+import type {
+  FileMetadata,
+} from "./types/file";
 
 
-interface SortingFile extends FileMetadata {
+interface SortingFile
+  extends FileMetadata {
   previewSrc?: string;
 }
 
@@ -24,56 +34,300 @@ type AppPage =
   | "complete";
 
 
+export type Theme =
+  | "light"
+  | "dark";
+
+
+function getInitialTheme(): Theme {
+
+  try {
+
+    const savedTheme =
+      localStorage.getItem(
+        "archio-theme",
+      );
+
+
+    if (
+      savedTheme === "dark"
+    ) {
+
+      return "dark";
+
+    }
+
+
+    return "light";
+
+  } catch {
+
+    return "light";
+
+  }
+}
+
+
+function applyTheme(
+  theme: Theme,
+) {
+
+  const root =
+    document.documentElement;
+
+  const body =
+    document.body;
+
+
+  root.dataset.theme =
+    theme;
+
+  body.dataset.theme =
+    theme;
+
+  root.style.colorScheme =
+    theme;
+
+}
+
+
 function App() {
 
-  const [currentPage, setCurrentPage] =
-    useState<AppPage>("home");
+  /*
+   * ========================================================
+   * PAGE
+   * ========================================================
+   */
+
+  const [
+    currentPage,
+    setCurrentPage,
+  ] = useState<AppPage>(
+    "home",
+  );
 
 
-  const [folderPath, setFolderPath] =
-    useState("");
+  /*
+   * ========================================================
+   * THEME
+   * ========================================================
+   */
+
+  const [
+    theme,
+    setTheme,
+  ] = useState<Theme>(
+    getInitialTheme,
+  );
 
 
-  const [files, setFiles] =
-    useState<SortingFile[]>([]);
+  /*
+   * ========================================================
+   * APPLY THEME
+   * ========================================================
+   */
+
+  useEffect(() => {
+
+    applyTheme(
+      theme,
+    );
 
 
-  const [currentIndex, setCurrentIndex] =
-    useState(0);
+    try {
+
+      localStorage.setItem(
+        "archio-theme",
+        theme,
+      );
+
+    } catch {
+      // Ignore localStorage errors.
+    }
+
+  }, [
+    theme,
+  ]);
 
 
-  const [actionError, setActionError] =
-    useState<string | null>(null);
+  /*
+   * ========================================================
+   * SYNC THEME
+   * ========================================================
+   *
+   * Home mempunyai ThemeToggle tanpa props.
+   * Jika toggle tersebut mengubah data-theme langsung,
+   * App akan ikut mengetahui perubahan tersebut.
+   */
+
+  useEffect(() => {
+
+    const root =
+      document.documentElement;
 
 
-  /* ========================================================
-     START SORTING
-     ======================================================== */
+    const observer =
+      new MutationObserver(
+        () => {
+
+          const domTheme =
+            root.dataset.theme;
+
+
+          if (
+            domTheme === "dark"
+            ||
+            domTheme === "light"
+          ) {
+
+            setTheme(
+              (previousTheme) =>
+                previousTheme === domTheme
+                  ? previousTheme
+                  : domTheme,
+            );
+
+          }
+
+        },
+      );
+
+
+    observer.observe(
+      root,
+      {
+        attributes: true,
+
+        attributeFilter: [
+          "data-theme",
+        ],
+      },
+    );
+
+
+    return () => {
+
+      observer.disconnect();
+
+    };
+
+  }, []);
+
+
+  /*
+   * ========================================================
+   * THEME TOGGLE
+   * ========================================================
+   */
+
+  const handleThemeToggle =
+    () => {
+
+      setTheme(
+        (previousTheme) =>
+          previousTheme === "dark"
+            ? "light"
+            : "dark",
+      );
+
+    };
+
+
+  /*
+   * ========================================================
+   * FOLDER
+   * ========================================================
+   */
+
+  const [
+    folderPath,
+    setFolderPath,
+  ] = useState("");
+
+
+  /*
+   * ========================================================
+   * FILES
+   * ========================================================
+   */
+
+  const [
+    files,
+    setFiles,
+  ] = useState<SortingFile[]>(
+    [],
+  );
+
+
+  /*
+   * ========================================================
+   * CURRENT FILE
+   * ========================================================
+   */
+
+  const [
+    currentIndex,
+    setCurrentIndex,
+  ] = useState(0);
+
+
+  /*
+   * ========================================================
+   * ERROR
+   * ========================================================
+   */
+
+  const [
+    actionError,
+    setActionError,
+  ] = useState<string | null>(
+    null,
+  );
+
+
+  /*
+   * ========================================================
+   * START SORTING
+   * ========================================================
+   */
 
   const handleFolderSelected = (
     selectedFolderPath: string,
-    scannedFiles: FileMetadata[]
+    scannedFiles: FileMetadata[],
   ) => {
 
     setFolderPath(
-      selectedFolderPath
+      selectedFolderPath,
     );
+
 
     setFiles(
-      scannedFiles
+      scannedFiles,
     );
 
-    setCurrentIndex(0);
 
-    setActionError(null);
+    setCurrentIndex(
+      0,
+    );
 
-    setCurrentPage("sorting");
+
+    setActionError(
+      null,
+    );
+
+
+    setCurrentPage(
+      "sorting",
+    );
+
   };
 
 
-  /* ========================================================
-     NEXT FILE
-     ======================================================== */
+  /*
+   * ========================================================
+   * NEXT FILE
+   * ========================================================
+   */
 
   const goToNextFile = () => {
 
@@ -90,65 +344,79 @@ function App() {
         ) {
 
           setCurrentPage(
-            "complete"
+            "complete",
           );
 
+
           return previousIndex;
+
         }
 
 
         return nextIndex;
-      }
+
+      },
     );
+
   };
 
 
-  /* ========================================================
-     SAVE
-     ======================================================== */
+  /*
+   * ========================================================
+   * SAVE
+   * ========================================================
+   */
 
   const handleSave = (
-    file: SortingFile
+    file: SortingFile,
   ) => {
 
-    setActionError(null);
+    setActionError(
+      null,
+    );
 
 
     console.log(
       "[Archio] Saved:",
-      file.path
+      file.path,
     );
 
 
     /*
-     * Simpan = file tetap berada di tempatnya.
+     * Simpan = file tetap berada
+     * di tempatnya.
      */
 
     goToNextFile();
+
   };
 
 
-  /* ========================================================
-     DELETE
-     ======================================================== */
+  /*
+   * ========================================================
+   * DELETE
+   * ========================================================
+   */
 
   const handleDelete = async (
-    file: SortingFile
+    file: SortingFile,
   ) => {
 
     try {
 
-      setActionError(null);
+      setActionError(
+        null,
+      );
 
 
       await deleteFile(
-        file.path
+        file.path,
       );
 
 
       console.log(
         "[Archio] Deleted:",
-        file.path
+        file.path,
       );
 
 
@@ -158,7 +426,7 @@ function App() {
 
       console.error(
         "[Archio] Delete failed:",
-        error
+        error,
       );
 
 
@@ -167,23 +435,29 @@ function App() {
           ? error
           : error instanceof Error
             ? error.message
-            : "Gagal menghapus file."
+            : "Gagal menghapus file.",
       );
+
     }
+
   };
 
 
-  /* ========================================================
-     MOVE
-     ======================================================== */
+  /*
+   * ========================================================
+   * MOVE
+   * ========================================================
+   */
 
   const handleMove = async (
-    file: SortingFile
+    file: SortingFile,
   ) => {
 
     try {
 
-      setActionError(null);
+      setActionError(
+        null,
+      );
 
 
       const destinationFolder =
@@ -195,13 +469,15 @@ function App() {
        */
 
       if (!destinationFolder) {
+
         return;
+
       }
 
 
       await moveFile(
         file.path,
-        destinationFolder
+        destinationFolder,
       );
 
 
@@ -209,7 +485,7 @@ function App() {
         "[Archio] Moved:",
         file.path,
         "→",
-        destinationFolder
+        destinationFolder,
       );
 
 
@@ -219,7 +495,7 @@ function App() {
 
       console.error(
         "[Archio] Move failed:",
-        error
+        error,
       );
 
 
@@ -228,125 +504,198 @@ function App() {
           ? error
           : error instanceof Error
             ? error.message
-            : "Gagal memindahkan file."
+            : "Gagal memindahkan file.",
       );
+
     }
+
   };
 
 
-  /* ========================================================
-     BACK TO HOME
-     ======================================================== */
+  /*
+   * ========================================================
+   * BACK TO HOME
+   * ========================================================
+   */
 
   const handleBack = () => {
 
-    setCurrentPage("home");
+    setCurrentPage(
+      "home",
+    );
 
-    setFolderPath("");
 
-    setFiles([]);
+    setFolderPath(
+      "",
+    );
 
-    setCurrentIndex(0);
 
-    setActionError(null);
+    setFiles(
+      [],
+    );
+
+
+    setCurrentIndex(
+      0,
+    );
+
+
+    setActionError(
+      null,
+    );
+
   };
 
 
-  /* ========================================================
-     COMPLETION
-     ======================================================== */
+  /*
+   * ========================================================
+   * COMPLETION
+   * ========================================================
+   */
 
-  if (currentPage === "complete") {
+  if (
+    currentPage ===
+    "complete"
+  ) {
 
     return (
       <main
-        style={{
-          width: "100%",
-          minHeight: "100vh",
-
-          display: "flex",
-          flexDirection: "column",
-
-          alignItems: "center",
-          justifyContent: "center",
-
-          gap: "10px",
-
-          padding: "32px",
-
-          boxSizing: "border-box",
-
-          background: "#f5f6f8",
-
-          fontFamily:
-            "Urbanist, sans-serif",
-        }}
+        className="completion-page"
       >
 
-        <h1
-          style={{
-            margin: 0,
-            fontSize: "32px",
-            fontWeight: 600,
-          }}
+        <div
+          className="completion-theme-toggle"
         >
-          Folder selesai
-        </h1>
+
+          <ThemeToggle
+            theme={theme}
+            onToggle={
+              handleThemeToggle
+            }
+          />
+
+        </div>
 
 
-        <p
-          style={{
-            margin: 0,
-            color: "#777",
-          }}
+        <section
+          className="completion-card"
         >
-          Semua file sudah diproses.
-        </p>
+
+          <div
+            className="completion-icon"
+            aria-hidden="true"
+          >
+
+            <svg
+              viewBox="0 0 48 48"
+              fill="none"
+            >
+
+              <circle
+                cx="24"
+                cy="24"
+                r="22"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+
+              <path
+                d="M14 24.5L20.5 31L34 17"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+            </svg>
+
+          </div>
 
 
-        <button
-          type="button"
-          onClick={handleBack}
-          style={{
-            marginTop: "16px",
+          <h1
+            className="completion-title"
+          >
+            Folder selesai
+          </h1>
 
-            padding:
-              "11px 22px",
 
-            border: "none",
-            borderRadius: "8px",
+          <p
+            className="completion-description"
+          >
+            Semua file sudah diproses.
+          </p>
 
-            background: "#4c73e6",
-            color: "#fff",
 
-            fontFamily:
-              "Urbanist, sans-serif",
+          <button
+            type="button"
+            className="completion-button"
+            onClick={
+              handleBack
+            }
+          >
 
-            fontSize: "14px",
-            fontWeight: 600,
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
 
-            cursor: "pointer",
-          }}
+              <path
+                d="M19 12H5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+
+              <path
+                d="M10 7L5 12L10 17"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+            </svg>
+
+
+            <span>
+              Kembali ke Home
+            </span>
+
+          </button>
+
+        </section>
+
+
+        <span
+          className="completion-version"
         >
-          Kembali ke Home
-        </button>
+          Archio v1.0
+        </span>
 
       </main>
     );
+
   }
 
 
-  /* ========================================================
-     SORTING
-     ======================================================== */
+  /*
+   * ========================================================
+   * SORTING
+   * ========================================================
+   */
 
-  if (currentPage === "sorting") {
+  if (
+    currentPage ===
+    "sorting"
+  ) {
 
     const folderName =
       folderPath
         .split(/[\\/]/)
         .filter(Boolean)
-        .pop() ||
+        .pop()
+      ||
       folderPath;
 
 
@@ -360,15 +709,41 @@ function App() {
       >
 
         <Sorting
-          folderName={folderName}
-          files={files}
-          currentIndex={currentIndex}
+          folderName={
+            folderName
+          }
 
-          onBack={handleBack}
+          files={
+            files
+          }
 
-          onDelete={handleDelete}
-          onMove={handleMove}
-          onSave={handleSave}
+          currentIndex={
+            currentIndex
+          }
+
+          onBack={
+            handleBack
+          }
+
+          onDelete={
+            handleDelete
+          }
+
+          onMove={
+            handleMove
+          }
+
+          onSave={
+            handleSave
+          }
+
+          theme={
+            theme
+          }
+
+          onThemeToggle={
+            handleThemeToggle
+          }
         />
 
 
@@ -391,34 +766,42 @@ function App() {
               padding:
                 "10px 16px",
 
-              borderRadius: "8px",
+              borderRadius:
+                "8px",
 
               background:
                 "#c0392b",
 
-              color: "#fff",
+              color:
+                "#fff",
 
               fontFamily:
                 "Urbanist, sans-serif",
 
-              fontSize: "13px",
+              fontSize:
+                "13px",
 
               boxShadow:
                 "0 6px 20px rgba(0,0,0,0.15)",
             }}
           >
+
             {actionError}
+
           </div>
         )}
 
       </div>
     );
+
   }
 
 
-  /* ========================================================
-     HOME
-     ======================================================== */
+  /*
+   * ========================================================
+   * HOME
+   * ========================================================
+   */
 
   return (
     <Home
@@ -427,6 +810,7 @@ function App() {
       }
     />
   );
+
 }
 
 

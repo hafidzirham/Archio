@@ -3,24 +3,94 @@ use std::{
     io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{Child, ChildStdin, ChildStdout, Command, Stdio},
-    sync::Mutex,
+    sync::{Arc, Mutex},
 };
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
 use serde::{Deserialize, Serialize};
+use tauri::Manager;
 
 
 /* ============================================================
    PATH
    ============================================================ */
 
-const PYTHON_PATH: &str =
+const SYSTEM_PYTHON_PATH: &str =
     r"C:\Program Files\LibreOffice\program\python.exe";
 
-const RENDERER_PATH: &str =
+const SYSTEM_RENDERER_PATH: &str =
     r"D:\Archio\src\backend\preview\presentation\renderer.py";
+
+
+/* ============================================================
+   BUNDLED RESOURCE PATH
+   ============================================================ */
+
+fn get_resource_path(
+    app: &tauri::AppHandle,
+    relative_path: &str,
+) -> Result<PathBuf, String> {
+
+    /* ========================================================
+       PRODUCTION
+
+       Resource hasil bundle Tauri.
+       ======================================================== */
+
+    if let Ok(resource_dir) = app.path().resource_dir() {
+
+        let bundled_path =
+            resource_dir.join(relative_path);
+
+        if bundled_path.exists() {
+            return Ok(bundled_path);
+        }
+    }
+
+
+    /* ========================================================
+       DEVELOPMENT
+
+       Saat npm run tauri dev:
+
+       D:\Archio
+       └── resources
+           └── renderer
+               └── ...
+       ======================================================== */
+
+    let project_root =
+        PathBuf::from(
+            env!("CARGO_MANIFEST_DIR")
+        )
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| {
+            PathBuf::from(".")
+        });
+
+
+    let development_path =
+        project_root
+            .join("resources")
+            .join(relative_path);
+
+
+    if development_path.exists() {
+        return Ok(development_path);
+    }
+
+
+    Err(format!(
+        "Bundled resource tidak ditemukan.\n\
+         Resource: {}\n\
+         Development path: {}",
+        relative_path,
+        development_path.display()
+    ))
+}
 
 
 /* ============================================================
@@ -62,20 +132,94 @@ struct PresentationWorker {
 
 impl PresentationWorker {
 
-    fn start() -> Result<Self, String> {
+    fn start(
+        app: &tauri::AppHandle,
+    ) -> Result<Self, String> {
 
-        if !Path::new(PYTHON_PATH).exists() {
+        /* ====================================================
+           FIND BUNDLED PYTHON
+           ==================================================== */
+
+        let bundled_python =
+            get_resource_path(
+                app,
+                "renderer/libreoffice/program/python.exe",
+            )
+            .ok();
+
+
+        /* ====================================================
+           FIND BUNDLED RENDERER
+           ==================================================== */
+
+        let bundled_renderer =
+            get_resource_path(
+                app,
+                "renderer/presentation/renderer.py",
+            )
+            .ok();
+
+
+        /* ====================================================
+           SELECT PYTHON
+
+           Prioritas:
+
+           1. Bundled LibreOffice Python
+           2. System LibreOffice Python
+           ==================================================== */
+
+        let python_path =
+            bundled_python
+                .filter(|path| path.exists())
+                .unwrap_or_else(|| {
+                    PathBuf::from(
+                        SYSTEM_PYTHON_PATH
+                    )
+                });
+
+
+        /* ====================================================
+           SELECT RENDERER
+
+           Prioritas:
+
+           1. Bundled renderer
+           2. Development renderer
+           ==================================================== */
+
+        let renderer_path =
+            bundled_renderer
+                .filter(|path| path.exists())
+                .unwrap_or_else(|| {
+                    PathBuf::from(
+                        SYSTEM_RENDERER_PATH
+                    )
+                });
+
+
+        /* ====================================================
+           VALIDATE PYTHON
+           ==================================================== */
+
+        if !python_path.exists() {
+
             return Err(format!(
-                "Python LibreOffice tidak ditemukan: {}",
-                PYTHON_PATH
+                "Python LibreOffice tidak ditemukan. Dicoba: {}",
+                python_path.display()
             ));
         }
 
 
-        if !Path::new(RENDERER_PATH).exists() {
+        /* ====================================================
+           VALIDATE RENDERER
+           ==================================================== */
+
+        if !renderer_path.exists() {
+
             return Err(format!(
                 "renderer.py tidak ditemukan: {}",
-                RENDERER_PATH
+                renderer_path.display()
             ));
         }
 
@@ -85,12 +229,41 @@ impl PresentationWorker {
         );
 
 
-        let mut child = Command::new(PYTHON_PATH)
-            .arg(RENDERER_PATH)
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .creation_flags(0x08000000)
+        println!(
+            "[PresentationWorker] Python: {}",
+            python_path.display()
+        );
+
+
+        println!(
+            "[PresentationWorker] Renderer: {}",
+            renderer_path.display()
+        );
+
+
+        /* ====================================================
+           START PROCESS
+           ==================================================== */
+
+        let mut child =
+            Command::new(
+                &python_path
+            )
+            .arg(
+                &renderer_path
+            )
+            .stdin(
+                Stdio::piped()
+            )
+            .stdout(
+                Stdio::piped()
+            )
+            .stderr(
+                Stdio::inherit()
+            )
+            .creation_flags(
+                0x08000000
+            )
             .spawn()
             .map_err(|error| {
                 format!(
@@ -100,25 +273,38 @@ impl PresentationWorker {
             })?;
 
 
-        let stdin = child
-            .stdin
-            .take()
-            .ok_or_else(|| {
-                "Gagal mengambil stdin renderer."
-                    .to_string()
-            })?;
+        /* ====================================================
+           STDIN
+           ==================================================== */
+
+        let stdin =
+            child
+                .stdin
+                .take()
+                .ok_or_else(|| {
+                    "Gagal mengambil stdin renderer."
+                        .to_string()
+                })?;
 
 
-        let stdout = child
-            .stdout
-            .take()
-            .ok_or_else(|| {
-                "Gagal mengambil stdout renderer."
-                    .to_string()
-            })?;
+        /* ====================================================
+           STDOUT
+           ==================================================== */
+
+        let stdout =
+            child
+                .stdout
+                .take()
+                .ok_or_else(|| {
+                    "Gagal mengambil stdout renderer."
+                        .to_string()
+                })?;
 
 
-        let stdout = BufReader::new(stdout);
+        let stdout =
+            BufReader::new(
+                stdout
+            );
 
 
         println!(
@@ -134,13 +320,20 @@ impl PresentationWorker {
     }
 
 
+    /* ========================================================
+       RENDER REQUEST
+       ======================================================== */
+
     fn render(
         &mut self,
         file_path: String,
         slide_index: usize,
     ) -> Result<serde_json::Value, String> {
 
-        if !Path::new(&file_path).exists() {
+        if !Path::new(
+            &file_path
+        ).exists() {
+
             return Err(format!(
                 "File tidak ditemukan: {}",
                 file_path
@@ -148,14 +341,21 @@ impl PresentationWorker {
         }
 
 
-        let request = PresentationRequest {
-            command: "render".to_string(),
-            file_path,
-            slide_index,
-        };
+        let request =
+            PresentationRequest {
+                command:
+                    "render".to_string(),
+
+                file_path,
+
+                slide_index,
+            };
 
 
-        let json = serde_json::to_string(&request)
+        let json =
+            serde_json::to_string(
+                &request
+            )
             .map_err(|error| {
                 format!(
                     "Gagal membuat request renderer: {}",
@@ -163,6 +363,10 @@ impl PresentationWorker {
                 )
             })?;
 
+
+        /* ====================================================
+           SEND REQUEST
+           ==================================================== */
 
         writeln!(
             self.stdin,
@@ -187,11 +391,18 @@ impl PresentationWorker {
             })?;
 
 
-        let mut response_line = String::new();
+        /* ====================================================
+           READ RESPONSE
+           ==================================================== */
+
+        let mut response_line =
+            String::new();
 
 
         self.stdout
-            .read_line(&mut response_line)
+            .read_line(
+                &mut response_line
+            )
             .map_err(|error| {
                 format!(
                     "Gagal membaca response renderer: {}",
@@ -200,7 +411,11 @@ impl PresentationWorker {
             })?;
 
 
-        if response_line.trim().is_empty() {
+        if response_line
+            .trim()
+            .is_empty()
+        {
+
             return Err(
                 "Renderer mengembalikan response kosong."
                     .to_string()
@@ -208,20 +423,30 @@ impl PresentationWorker {
         }
 
 
-        let response: PresentationResponse =
-            serde_json::from_str(
-                response_line.trim()
-            )
-            .map_err(|error| {
-                format!(
-                    "Response renderer tidak valid: {} | Response: {}",
-                    error,
+        /* ====================================================
+           PARSE RESPONSE
+           ==================================================== */
+
+        let response:
+            PresentationResponse =
+                serde_json::from_str(
                     response_line.trim()
                 )
-            })?;
+                .map_err(|error| {
+                    format!(
+                        "Response renderer tidak valid: {} | Response: {}",
+                        error,
+                        response_line.trim()
+                    )
+                })?;
 
+
+        /* ====================================================
+           CHECK SUCCESS
+           ==================================================== */
 
         if !response.success {
+
             return Err(
                 response
                     .error
@@ -242,8 +467,14 @@ impl PresentationWorker {
     }
 
 
+    /* ========================================================
+       SHUTDOWN
+       ======================================================== */
+
     #[allow(dead_code)]
-    fn shutdown(&mut self) {
+    fn shutdown(
+        &mut self,
+    ) {
 
         let shutdown_request =
             serde_json::json!({
@@ -251,18 +482,24 @@ impl PresentationWorker {
             });
 
 
-        let _ = writeln!(
-            self.stdin,
-            "{}",
-            shutdown_request
-        );
+        let _ =
+            writeln!(
+                self.stdin,
+                "{}",
+                shutdown_request
+            );
 
 
-        let _ = self.stdin.flush();
+        let _ =
+            self.stdin.flush();
 
-        let _ = self.child.kill();
 
-        let _ = self.child.wait();
+        let _ =
+            self.child.kill();
+
+
+        let _ =
+            self.child.wait();
 
 
         println!(
@@ -295,6 +532,11 @@ fn get_file_category(
 ) -> &'static str {
 
     match extension.to_lowercase().as_str() {
+
+        /* ====================================================
+           IMAGE
+           ==================================================== */
+
         ".jpg"
         | ".jpeg"
         | ".png"
@@ -313,6 +555,11 @@ fn get_file_category(
             "image"
         }
 
+
+        /* ====================================================
+           VIDEO
+           ==================================================== */
+
         ".mp4"
         | ".mkv"
         | ".avi"
@@ -322,6 +569,11 @@ fn get_file_category(
         | ".m4v" => {
             "video"
         }
+
+
+        /* ====================================================
+           AUDIO
+           ==================================================== */
 
         ".mp3"
         | ".wav"
@@ -333,6 +585,11 @@ fn get_file_category(
             "audio"
         }
 
+
+        /* ====================================================
+           DOCUMENT
+           ==================================================== */
+
         ".pdf"
         | ".doc"
         | ".docx"
@@ -342,6 +599,11 @@ fn get_file_category(
             "document"
         }
 
+
+        /* ====================================================
+           SPREADSHEET
+           ==================================================== */
+
         ".xls"
         | ".xlsx"
         | ".xlsm"
@@ -349,6 +611,11 @@ fn get_file_category(
         | ".ods" => {
             "spreadsheet"
         }
+
+
+        /* ====================================================
+           PRESENTATION
+           ==================================================== */
 
         ".ppt"
         | ".pptx"
@@ -360,6 +627,7 @@ fn get_file_category(
         | ".odp" => {
             "presentation"
         }
+
 
         _ => {
             "unsupported"
@@ -377,7 +645,10 @@ fn scan_directory(
     files: &mut Vec<ScannedFile>,
 ) -> Result<(), String> {
 
-    let entries = std::fs::read_dir(directory)
+    let entries =
+        std::fs::read_dir(
+            directory
+        )
         .map_err(|error| {
             format!(
                 "Gagal membaca folder {}: {}",
@@ -389,40 +660,45 @@ fn scan_directory(
 
     for entry in entries {
 
-        let entry = match entry {
+        let entry =
+            match entry {
 
-            Ok(entry) => entry,
+                Ok(entry) =>
+                    entry,
 
-            Err(error) => {
+                Err(error) => {
 
-                eprintln!(
-                    "[FileScanner] Gagal membaca entry: {}",
-                    error
-                );
+                    eprintln!(
+                        "[FileScanner] Gagal membaca entry: {}",
+                        error
+                    );
 
-                continue;
-            }
-        };
-
-
-        let path = entry.path();
+                    continue;
+                }
+            };
 
 
-        let metadata = match entry.metadata() {
+        let path =
+            entry.path();
 
-            Ok(metadata) => metadata,
 
-            Err(error) => {
+        let metadata =
+            match entry.metadata() {
 
-                eprintln!(
-                    "[FileScanner] Gagal membaca metadata {}: {}",
-                    path.display(),
-                    error
-                );
+                Ok(metadata) =>
+                    metadata,
 
-                continue;
-            }
-        };
+                Err(error) => {
+
+                    eprintln!(
+                        "[FileScanner] Gagal membaca metadata {}: {}",
+                        path.display(),
+                        error
+                    );
+
+                    continue;
+                }
+            };
 
 
         if !metadata.is_file() {
@@ -430,27 +706,29 @@ fn scan_directory(
         }
 
 
-        let extension = path
-            .extension()
-            .and_then(|extension| {
-                extension.to_str()
-            })
-            .map(|extension| {
-                format!(
-                    ".{}",
-                    extension.to_lowercase()
-                )
-            })
-            .unwrap_or_default();
+        let extension =
+            path
+                .extension()
+                .and_then(|extension| {
+                    extension.to_str()
+                })
+                .map(|extension| {
+                    format!(
+                        ".{}",
+                        extension.to_lowercase()
+                    )
+                })
+                .unwrap_or_default();
 
 
-        let name = path
-            .file_name()
-            .and_then(|name| {
-                name.to_str()
-            })
-            .unwrap_or("")
-            .to_string();
+        let name =
+            path
+                .file_name()
+                .and_then(|name| {
+                    name.to_str()
+                })
+                .unwrap_or("")
+                .to_string();
 
 
         if name.is_empty() {
@@ -459,18 +737,27 @@ fn scan_directory(
 
 
         let category =
-            get_file_category(&extension);
+            get_file_category(
+                &extension
+            );
 
 
         files.push(
             ScannedFile {
                 name,
-                path: path
-                    .to_string_lossy()
-                    .to_string(),
+
+                path:
+                    path
+                        .to_string_lossy()
+                        .to_string(),
+
                 extension,
-                category: category.to_string(),
-                size: metadata.len(),
+
+                category:
+                    category.to_string(),
+
+                size:
+                    metadata.len(),
             }
         );
     }
@@ -479,190 +766,732 @@ fn scan_directory(
     Ok(())
 }
 
+
 /* ============================================================
    IMAGE / VECTOR PREVIEW
    ============================================================ */
 
 #[tauri::command]
-fn render_image_preview(
+async fn render_image_preview(
+    app: tauri::AppHandle,
     file_path: String,
 ) -> Result<String, String> {
 
-    let source = Path::new(&file_path);
+    tauri::async_runtime::spawn_blocking(
+        move || {
+            render_image_preview_blocking(
+                app,
+                file_path,
+            )
+        }
+    )
+    .await
+    .map_err(|error| {
+        format!(
+            "Image renderer task gagal: {}",
+            error
+        )
+    })?
+}
+
+
+fn render_image_preview_blocking(
+    app: tauri::AppHandle,
+    file_path: String,
+) -> Result<String, String> {
+
+    /* ========================================================
+       VALIDATE SOURCE
+       ======================================================== */
+
+    let source =
+        Path::new(
+            &file_path
+        );
+
 
     if !source.exists() {
+
         return Err(format!(
             "File tidak ditemukan: {}",
             file_path
         ));
     }
 
+
     if !source.is_file() {
+
         return Err(format!(
             "Path bukan file: {}",
             file_path
         ));
     }
 
-    let extension = source
-        .extension()
-        .and_then(|extension| extension.to_str())
-        .unwrap_or("")
-        .to_lowercase();
 
-    let supported = matches!(
+    /* ========================================================
+       GET EXTENSION
+       ======================================================== */
+
+    let extension =
+        source
+            .extension()
+            .and_then(|extension| {
+                extension.to_str()
+            })
+            .unwrap_or("")
+            .to_lowercase();
+
+
+    /* ========================================================
+       SUPPORTED VECTOR FORMATS
+       ======================================================== */
+
+    if !matches!(
         extension.as_str(),
-        "ai" | "eps" | "ps" | "psd" | "psb"
-    );
 
-    if !supported {
+        "ai"
+        | "eps"
+        | "ps"
+        | "psd"
+        | "psb"
+    ) {
+
         return Err(format!(
-            "Format {} tidak didukung oleh vector renderer.",
+            "Format .{} tidak didukung oleh vector renderer.",
             extension
         ));
     }
 
-    let temp_directory =
-        std::env::temp_dir().join("Archio").join("preview");
 
-    fs::create_dir_all(&temp_directory)
+    /* ========================================================
+       CACHE KEY
+       ======================================================== */
+
+    use std::collections::hash_map::DefaultHasher;
+
+    use std::hash::{
+        Hash,
+        Hasher,
+    };
+
+
+    let metadata =
+        fs::metadata(
+            source
+        )
         .map_err(|error| {
             format!(
-                "Gagal membuat temporary preview directory: {}",
+                "Gagal membaca metadata source: {}",
                 error
             )
         })?;
 
-    /*
-     * Nama output dibuat berdasarkan timestamp + process ID
-     * supaya tidak bentrok ketika beberapa file dirender.
-     */
-    let timestamp = std::time::SystemTime::now()
-        .duration_since(
-            std::time::UNIX_EPOCH
-        )
-        .map_err(|error| {
-            format!(
-                "Gagal mendapatkan timestamp: {}",
-                error
-            )
-        })?
-        .as_millis();
 
-    let process_id =
-        std::process::id();
+    let modified =
+        metadata
+            .modified()
+            .ok()
+            .and_then(|value| {
+                value.duration_since(
+                    std::time::UNIX_EPOCH
+                )
+                .ok()
+            })
+            .map(|value| {
+                value.as_nanos()
+            })
+            .unwrap_or(0);
 
-    let output_path = temp_directory.join(
-        format!(
-            "preview_{}_{}.png",
-            process_id,
-            timestamp
-        )
+
+    let mut hasher =
+        DefaultHasher::new();
+
+
+    file_path.hash(
+        &mut hasher
     );
+
+
+    extension.hash(
+        &mut hasher
+    );
+
+
+    metadata.len().hash(
+        &mut hasher
+    );
+
+
+    modified.hash(
+        &mut hasher
+    );
+
+
+    let cache_hash =
+        hasher.finish();
+
+
+    /* ========================================================
+       TEMP DIRECTORY
+       ======================================================== */
+
+    let temp_directory =
+        std::env::temp_dir()
+            .join("Archio")
+            .join("preview");
+
+
+    fs::create_dir_all(
+        &temp_directory
+    )
+    .map_err(|error| {
+        format!(
+            "Gagal membuat temporary preview directory: {}",
+            error
+        )
+    })?;
+
+
+    let output_path =
+        temp_directory.join(
+            format!(
+                "vector_{:016x}.png",
+                cache_hash
+            )
+        );
+
+
+    /* ========================================================
+       CACHE HIT
+       ======================================================== */
+
+    if output_path.exists() {
+
+        if let Ok(metadata) =
+            fs::metadata(
+                &output_path
+            )
+        {
+
+            if metadata.len() > 0 {
+
+                println!(
+                    "[ImageRenderer] Cache hit: {}",
+                    output_path.display()
+                );
+
+
+                return Ok(
+                    output_path
+                        .to_string_lossy()
+                        .to_string()
+                );
+            }
+        }
+    }
+
 
     println!(
         "[ImageRenderer] Rendering: {}",
         source.display()
     );
 
-    /*
-     * AI / EPS / PS biasanya membutuhkan density
-     * lebih tinggi ketika dirasterisasi.
-     */
+
+    /* ========================================================
+       FIND BUNDLED IMAGEMAGICK
+       ======================================================== */
+
+    let magick_path =
+        get_resource_path(
+            &app,
+            "renderer/imagemagick/magick.exe",
+        )?;
+
+
+    if !magick_path.exists() {
+
+        return Err(format!(
+            "ImageMagick bundled tidak ditemukan: {}",
+            magick_path.display()
+        ));
+    }
+
+
+    if !magick_path.is_file() {
+
+        return Err(format!(
+            "Path ImageMagick bukan file: {}",
+            magick_path.display()
+        ));
+    }
+
+
+    println!(
+        "[ImageRenderer] Using ImageMagick: {}",
+        magick_path.display()
+    );
+
+
+    /* ========================================================
+       FIND BUNDLED GHOSTSCRIPT
+       ======================================================== */
+
+    let ghostscript_bin =
+        get_resource_path(
+            &app,
+            "renderer/ghostscript/bin",
+        )?;
+
+
+    if !ghostscript_bin.exists() {
+
+        return Err(format!(
+            "Ghostscript bundled tidak ditemukan: {}",
+            ghostscript_bin.display()
+        ));
+    }
+
+
+    /* ========================================================
+       CREATE IMAGEMAGICK COMMAND
+       ======================================================== */
+
     let mut command =
-        Command::new("magick");
+        Command::new(
+            &magick_path
+        );
+
+
+    /* ========================================================
+       GHOSTSCRIPT PATH
+       ======================================================== */
+
+    let current_path =
+        std::env::var_os(
+            "PATH"
+        )
+        .unwrap_or_default();
+
+
+    let mut paths =
+        Vec::new();
+
+
+    paths.push(
+        ghostscript_bin.clone()
+    );
+
+
+    paths.extend(
+        std::env::split_paths(
+            &current_path
+        )
+    );
+
+
+    if let Ok(new_path) =
+        std::env::join_paths(
+            paths
+        )
+    {
+
+        command.env(
+            "PATH",
+            new_path
+        );
+    }
+
+
+    /* ========================================================
+       AI / EPS / PS
+       ======================================================== */
 
     if matches!(
         extension.as_str(),
-        "ai" | "eps" | "ps"
+
+        "ai"
+        | "eps"
+        | "ps"
     ) {
+
         command
             .arg("-density")
-            .arg("144");
+            .arg("96");
+
+
+        let input =
+            format!(
+                "{}[0]",
+                source.display()
+            );
+
+
+        command.arg(
+            input
+        );
     }
 
-    let output = command
-        .arg(source)
+
+    /* ========================================================
+       PSD / PSB
+       ======================================================== */
+
+    else {
+
+        command.arg(
+            source
+        );
+    }
+
+
+    /* ========================================================
+       COMMON PROCESSING
+       ======================================================== */
+
+    command
         .arg("-background")
         .arg("none")
+
         .arg("-alpha")
         .arg("on")
+
         .arg("-colorspace")
-        .arg("sRGB")
+        .arg("sRGB");
+
+
+    /* ========================================================
+       PSD / PSB FLATTEN
+       ======================================================== */
+
+    if matches!(
+        extension.as_str(),
+
+        "psd"
+        | "psb"
+    ) {
+
+        command
+            .arg("-layers")
+            .arg("flatten");
+    }
+
+
+    /* ========================================================
+       RESIZE
+       ======================================================== */
+
+    command
         .arg("-resize")
-        .arg("2400x2400>")
-        .arg(format!(
-            "PNG32:{}",
-            output_path.display()
-        ))
-        .output()
-        .map_err(|error| {
+        .arg("1400x1400>");
+
+
+    /* ========================================================
+       OUTPUT
+       ======================================================== */
+
+    command
+        .arg(
             format!(
-                "ImageMagick tidak dapat dijalankan. Pastikan ImageMagick sudah tersedia: {}",
-                error
+                "PNG32:{}",
+                output_path.display()
             )
-        })?;
+        );
+
+
+    println!(
+        "[ImageRenderer] Command: {:?}",
+        command
+    );
+
+
+    /* ========================================================
+       RUN IMAGEMAGICK
+       ======================================================== */
+
+    let output =
+        command
+            .output()
+            .map_err(|error| {
+                format!(
+                    "ImageMagick bundled tidak dapat dijalankan: {}",
+                    error
+                )
+            })?;
+
+
+    /* ========================================================
+       READ PROCESS OUTPUT
+       ======================================================== */
+
+    let stdout =
+        String::from_utf8_lossy(
+            &output.stdout
+        );
+
+
+    let stderr =
+        String::from_utf8_lossy(
+            &output.stderr
+        );
+
+
+    println!(
+        "[ImageRenderer] Exit status: {}",
+        output.status
+    );
+
+
+    if !stdout.trim().is_empty() {
+
+        println!(
+            "[ImageRenderer] stdout: {}",
+            stdout.trim()
+        );
+    }
+
+
+    if !stderr.trim().is_empty() {
+
+        println!(
+            "[ImageRenderer] stderr: {}",
+            stderr.trim()
+        );
+    }
+
+
+    /* ========================================================
+       PROCESS FAILED
+       ======================================================== */
 
     if !output.status.success() {
-        let stderr =
-            String::from_utf8_lossy(
-                &output.stderr
-            );
-
-        let stdout =
-            String::from_utf8_lossy(
-                &output.stdout
-            );
 
         return Err(format!(
-            "ImageMagick gagal merender file. stdout: {} | stderr: {}",
+            "ImageMagick gagal merender .{}.\n\
+             stdout: {}\n\
+             stderr: {}",
+            extension,
             stdout.trim(),
             stderr.trim()
         ));
     }
 
-    if !output_path.exists() {
-        return Err(
-            "ImageMagick selesai tetapi file preview tidak ditemukan."
+
+    /* ========================================================
+       CHECK EXPECTED OUTPUT
+       ======================================================== */
+
+    if output_path.exists() {
+
+        let metadata =
+            fs::metadata(
+                &output_path
+            )
+            .map_err(|error| {
+                format!(
+                    "Preview berhasil dibuat tetapi metadata gagal dibaca: {}",
+                    error
+                )
+            })?;
+
+
+        if metadata.len() == 0 {
+
+            let _ =
+                fs::remove_file(
+                    &output_path
+                );
+
+
+            return Err(
+                "ImageMagick menghasilkan file preview kosong."
+                    .to_string()
+            );
+        }
+
+
+        println!(
+            "[ImageRenderer] Preview created: {} ({} bytes)",
+            output_path.display(),
+            metadata.len()
+        );
+
+
+        return Ok(
+            output_path
+                .to_string_lossy()
                 .to_string()
         );
     }
 
-    println!(
-        "[ImageRenderer] Preview created: {}",
-        output_path.display()
-    );
 
-    Ok(
-        output_path
-            .to_string_lossy()
-            .to_string()
-    )
+    /* ========================================================
+       FALLBACK OUTPUT
+       ======================================================== */
+
+    let prefix =
+        format!(
+            "vector_{:016x}",
+            cache_hash
+        );
+
+
+    if let Ok(entries) =
+        fs::read_dir(
+            &temp_directory
+        )
+    {
+
+        for entry in entries.flatten() {
+
+            let candidate =
+                entry.path();
+
+
+            if !candidate.is_file() {
+                continue;
+            }
+
+
+            let extension_matches =
+                candidate
+                    .extension()
+                    .and_then(|value| {
+                        value.to_str()
+                    })
+                    .map(|value| {
+                        value.eq_ignore_ascii_case(
+                            "png"
+                        )
+                    })
+                    .unwrap_or(false);
+
+
+            if !extension_matches {
+                continue;
+            }
+
+
+            let name_matches =
+                candidate
+                    .file_stem()
+                    .and_then(|value| {
+                        value.to_str()
+                    })
+                    .map(|value| {
+                        value.starts_with(
+                            &prefix
+                        )
+                    })
+                    .unwrap_or(false);
+
+
+            if !name_matches {
+                continue;
+            }
+
+
+            let metadata =
+                match fs::metadata(
+                    &candidate
+                ) {
+
+                    Ok(metadata) =>
+                        metadata,
+
+                    Err(_) =>
+                        continue,
+                };
+
+
+            if metadata.len() == 0 {
+                continue;
+            }
+
+
+            println!(
+                "[ImageRenderer] Preview created using fallback output: {} ({} bytes)",
+                candidate.display(),
+                metadata.len()
+            );
+
+
+            return Ok(
+                candidate
+                    .to_string_lossy()
+                    .to_string()
+            );
+        }
+    }
+
+
+    /* ========================================================
+       NO OUTPUT
+       ======================================================== */
+
+    Err(format!(
+        "ImageMagick selesai tetapi file preview tidak ditemukan.\n\
+         Format: .{}\n\
+         Output yang diharapkan: {}\n\
+         stdout: {}\n\
+         stderr: {}",
+        extension,
+        output_path.display(),
+        stdout.trim(),
+        stderr.trim()
+    ))
 }
+
 
 /* ============================================================
    RENDER PRESENTATION
    ============================================================ */
 
 #[tauri::command]
-fn render_presentation(
+async fn render_presentation(
     file_path: String,
     slide_index: usize,
-    worker: tauri::State<'_, Mutex<PresentationWorker>>,
+    worker:
+        tauri::State<
+            '_,
+            Arc<
+                Mutex<
+                    PresentationWorker
+                >
+            >
+        >,
 ) -> Result<serde_json::Value, String> {
 
-    let mut worker = worker
-        .lock()
-        .map_err(|_| {
-            "Presentation worker sedang terkunci."
-                .to_string()
-        })?;
+    let worker =
+        Arc::clone(
+            &*worker
+        );
 
 
-    worker.render(
-        file_path,
-        slide_index,
+    tauri::async_runtime::spawn_blocking(
+        move || {
+
+            let mut worker =
+                worker
+                    .lock()
+                    .map_err(|_| {
+                        "Presentation worker sedang terkunci."
+                            .to_string()
+                    })?;
+
+
+            worker.render(
+                file_path,
+                slide_index,
+            )
+        }
     )
+    .await
+    .map_err(|error| {
+        format!(
+            "Presentation renderer task gagal: {}",
+            error
+        )
+    })?
 }
 
 
@@ -676,10 +1505,13 @@ fn scan_folder(
 ) -> Result<Vec<ScannedFile>, String> {
 
     let folder =
-        PathBuf::from(&folder_path);
+        PathBuf::from(
+            &folder_path
+        );
 
 
     if !folder.exists() {
+
         return Err(format!(
             "Folder tidak ditemukan: {}",
             folder_path
@@ -688,6 +1520,7 @@ fn scan_folder(
 
 
     if !folder.is_dir() {
+
         return Err(format!(
             "Path bukan folder: {}",
             folder_path
@@ -711,9 +1544,11 @@ fn scan_folder(
     )?;
 
 
-    files.sort_by_key(|file| {
-        file.name.to_lowercase()
-    });
+    files.sort_by_key(
+        |file| {
+            file.name.to_lowercase()
+        }
+    );
 
 
     println!(
@@ -736,10 +1571,13 @@ fn delete_file(
 ) -> Result<(), String> {
 
     let path =
-        Path::new(&file_path);
+        Path::new(
+            &file_path
+        );
 
 
     if !path.exists() {
+
         return Err(format!(
             "File tidak ditemukan: {}",
             file_path
@@ -748,6 +1586,7 @@ fn delete_file(
 
 
     if !path.is_file() {
+
         return Err(format!(
             "Path bukan file: {}",
             file_path
@@ -757,13 +1596,6 @@ fn delete_file(
 
     #[cfg(target_os = "windows")]
     {
-        /*
-         * Microsoft.VisualBasic.FileIO digunakan supaya
-         * file masuk ke Windows Recycle Bin, bukan
-         * langsung dihapus permanen.
-         *
-         * Path di-escape untuk PowerShell.
-         */
 
         let escaped_path =
             file_path.replace(
@@ -772,20 +1604,25 @@ fn delete_file(
             );
 
 
-        let script = format!(
-            r#"
-            Add-Type -AssemblyName Microsoft.VisualBasic;
-            [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile(
-                '{}',
-                [Microsoft.VisualBasic.FileIO.UIOption]::OnlyErrorDialogs,
-                [Microsoft.VisualBasic.FileIO.RecycleOption]::SendToRecycleBin
+        let script =
+            format!(
+                r#"
+                Add-Type -AssemblyName Microsoft.VisualBasic;
+
+                [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile(
+                    '{}',
+                    [Microsoft.VisualBasic.FileIO.UIOption]::OnlyErrorDialogs,
+                    [Microsoft.VisualBasic.FileIO.RecycleOption]::SendToRecycleBin
+                )
+                "#,
+                escaped_path
+            );
+
+
+        let output =
+            Command::new(
+                "powershell.exe"
             )
-            "#,
-            escaped_path
-        );
-
-
-        let output = Command::new("powershell.exe")
             .args([
                 "-NoProfile",
                 "-NonInteractive",
@@ -794,7 +1631,9 @@ fn delete_file(
                 "-Command",
                 &script,
             ])
-            .creation_flags(0x08000000)
+            .creation_flags(
+                0x08000000
+            )
             .output()
             .map_err(|error| {
                 format!(
@@ -850,13 +1689,19 @@ fn move_file(
 ) -> Result<String, String> {
 
     let source =
-        PathBuf::from(&file_path);
+        PathBuf::from(
+            &file_path
+        );
+
 
     let destination =
-        PathBuf::from(&destination_folder);
+        PathBuf::from(
+            &destination_folder
+        );
 
 
     if !source.exists() {
+
         return Err(format!(
             "File tidak ditemukan: {}",
             file_path
@@ -865,6 +1710,7 @@ fn move_file(
 
 
     if !source.is_file() {
+
         return Err(format!(
             "Path bukan file: {}",
             file_path
@@ -873,6 +1719,7 @@ fn move_file(
 
 
     if !destination.exists() {
+
         return Err(format!(
             "Folder tujuan tidak ditemukan: {}",
             destination_folder
@@ -881,6 +1728,7 @@ fn move_file(
 
 
     if !destination.is_dir() {
+
         return Err(format!(
             "Path tujuan bukan folder: {}",
             destination_folder
@@ -888,25 +1736,33 @@ fn move_file(
     }
 
 
-    let file_name = source
-        .file_name()
-        .ok_or_else(|| {
-            "Nama file tidak valid."
-                .to_string()
-        })?;
+    let file_name =
+        source
+            .file_name()
+            .ok_or_else(|| {
+                "Nama file tidak valid."
+                    .to_string()
+            })?;
 
 
     let target =
-        destination.join(file_name);
+        destination.join(
+            file_name
+        );
 
 
     if target.exists() {
+
         return Err(format!(
             "File dengan nama yang sama sudah ada di folder tujuan: {}",
             target.display()
         ));
     }
 
+
+    /* ========================================================
+       TRY RENAME FIRST
+       ======================================================== */
 
     match fs::rename(
         &source,
@@ -915,7 +1771,12 @@ fn move_file(
 
         Ok(_) => {}
 
+
         Err(rename_error) => {
+
+            /* =================================================
+               FALLBACK COPY + DELETE
+               ================================================= */
 
             fs::copy(
                 &source,
@@ -936,7 +1797,10 @@ fn move_file(
             .map_err(|remove_error| {
 
                 let _ =
-                    fs::remove_file(&target);
+                    fs::remove_file(
+                        &target
+                    );
+
 
                 format!(
                     "File berhasil disalin tetapi file asli gagal dihapus: {}",
@@ -973,11 +1837,15 @@ fn open_file_with(
 
     #[cfg(target_os = "windows")]
     {
+
         let path =
-            Path::new(&file_path);
+            Path::new(
+                &file_path
+            );
 
 
         if !path.exists() {
+
             return Err(format!(
                 "File tidak ditemukan: {}",
                 file_path
@@ -986,6 +1854,7 @@ fn open_file_with(
 
 
         if !path.is_file() {
+
             return Err(format!(
                 "Path bukan file: {}",
                 file_path
@@ -993,16 +1862,22 @@ fn open_file_with(
         }
 
 
-        Command::new("rundll32.exe")
-            .arg("shell32.dll,OpenAs_RunDLL")
-            .arg(&file_path)
-            .spawn()
-            .map_err(|error| {
-                format!(
-                    "Gagal membuka Windows Open With: {}",
-                    error
-                )
-            })?;
+        Command::new(
+            "rundll32.exe"
+        )
+        .arg(
+            "shell32.dll,OpenAs_RunDLL"
+        )
+        .arg(
+            &file_path
+        )
+        .spawn()
+        .map_err(|error| {
+            format!(
+                "Gagal membuka Windows Open With: {}",
+                error
+            )
+        })?;
 
 
         println!(
@@ -1029,25 +1904,54 @@ fn open_file_with(
    TAURI APP
    ============================================================ */
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[cfg_attr(
+    mobile,
+    tauri::mobile_entry_point
+)]
 pub fn run() {
-
-    let worker =
-        PresentationWorker::start()
-            .expect(
-                "Gagal memulai Presentation Renderer."
-            );
-
 
     tauri::Builder::default()
 
-        .manage(
-            Mutex::new(worker)
+        /* ====================================================
+           PRESENTATION WORKER
+           ==================================================== */
+
+        .setup(
+            |app| {
+
+                let worker =
+                    PresentationWorker::start(
+                        app.handle()
+                    )
+                    .expect(
+                        "Gagal memulai Presentation Renderer."
+                    );
+
+
+                app.manage(
+                    Arc::new(
+                        Mutex::new(
+                            worker
+                        )
+                    )
+                );
+
+
+                Ok(())
+            }
         )
+
+        /* ====================================================
+           DIALOG
+           ==================================================== */
 
         .plugin(
             tauri_plugin_dialog::init()
         )
+
+        /* ====================================================
+           COMMANDS
+           ==================================================== */
 
         .invoke_handler(
             tauri::generate_handler![
@@ -1060,6 +1964,10 @@ pub fn run() {
             ]
         )
 
+        /* ====================================================
+           BUILD
+           ==================================================== */
+
         .build(
             tauri::generate_context!()
         )
@@ -1068,13 +1976,21 @@ pub fn run() {
             "error while building Archio"
         )
 
+        /* ====================================================
+           RUN
+           ==================================================== */
+
         .run(
             |_app_handle, event| {
 
-                if let tauri::RunEvent::Exit = event {
+                if let tauri::RunEvent::Exit =
+                    event
+                {
 
-                    // Worker akan ikut berakhir
-                    // ketika proses aplikasi selesai.
+                    /*
+                     * Worker akan ikut berakhir
+                     * ketika proses aplikasi selesai.
+                     */
                 }
             }
         );

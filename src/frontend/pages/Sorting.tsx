@@ -3,28 +3,41 @@ import {
   useRef,
 } from "react";
 
+import PreviewResolver
+  from "../components/preview/PreviewResolver";
 
-import PreviewResolver from "../components/preview/PreviewResolver";
+import ActionBar
+  from "../components/sorting/ActionBar";
 
-import ActionBar from "../components/sorting/ActionBar";
+import FileInfo
+  from "../components/sorting/FileInfo";
 
-import FileInfo from "../components/sorting/FileInfo";
+import SortingHeader
+  from "../components/sorting/SortingHeader";
 
-import SortingHeader from "../components/sorting/SortingHeader";
+import SortingProgress
+  from "../components/sorting/SortingProgress";
 
-import SortingProgress from "../components/sorting/SortingProgress";
+import useFitScale
+  from "../hooks/useFitScale";
 
+import {
+  preloadPresentation,
+} from "../services/presentationService";
 
-import useFitScale from "../hooks/useFitScale";
-
+import {
+  preloadVectorPreview,
+} from "../services/vectorService";
 
 import type {
   FileMetadata,
 } from "../types/file";
 
+import type {
+  Theme,
+} from "../components/sorting/ThemeToggle";
 
 import "../styles/sorting.css";
-
 import "../styles/sorting-fit.css";
 
 
@@ -35,7 +48,6 @@ interface SortingFile
 
 
 interface SortingProps {
-
   folderName: string;
 
   files: SortingFile[];
@@ -45,16 +57,20 @@ interface SortingProps {
   onBack?: () => void;
 
   onDelete?: (
-    file: SortingFile,
+    file: SortingFile
   ) => void;
 
   onMove?: (
-    file: SortingFile,
+    file: SortingFile
   ) => void;
 
   onSave?: (
-    file: SortingFile,
+    file: SortingFile
   ) => void;
+
+  theme: Theme;
+
+  onThemeToggle: () => void;
 }
 
 
@@ -66,28 +82,13 @@ function Sorting({
   onDelete,
   onMove,
   onSave,
+  theme,
+  onThemeToggle,
 }: SortingProps) {
-
-  /*
-   * =========================================================
-   * CONTENT CANVAS
-   * =========================================================
-   *
-   * Header tidak masuk canvas.
-   *
-   * Yang di-scale:
-   *
-   * - Progress
-   * - Preview
-   * - File info
-   *
-   * ActionBar tetap berada di canvas yang sama,
-   * tetapi styling tombolnya berasal dari sorting.css.
-   */
 
   const stageRef =
     useRef<HTMLDivElement>(
-      null,
+      null
     );
 
 
@@ -95,18 +96,121 @@ function Sorting({
     scale,
     width,
     height,
-  } =
-    useFitScale(
-      stageRef,
-      {
-        horizontalPadding: 24,
-        verticalPadding: 16,
-      },
-    );
+  } = useFitScale(
+    stageRef,
+    {
+      horizontalPadding: 24,
+      verticalPadding: 16,
+    },
+  );
 
 
   const currentFile =
     files[currentIndex];
+
+
+  /*
+   * =========================================================
+   * PRELOAD NEXT FILE
+   * =========================================================
+   *
+   * Hanya file yang menggunakan renderer berat yang diproses.
+   *
+   * JPG / PNG / MP4 / PDF biasa tidak dipreload di sini.
+   *
+   * Presentation:
+   *   render slide pertama.
+   *
+   * AI / EPS / PS / PSD / PSB:
+   *   render preview vector.
+   *
+   * Delay 700ms memberi prioritas kepada preview file
+   * yang sedang aktif.
+   */
+
+  useEffect(() => {
+
+    const nextFile =
+      files[currentIndex + 1];
+
+
+    if (!nextFile) {
+      return;
+    }
+
+
+    const timer =
+      window.setTimeout(
+        () => {
+
+          const extension =
+            nextFile.extension
+              .toLowerCase();
+
+
+          /*
+           * VECTOR
+           */
+
+          const isVector =
+            nextFile.category ===
+              "image"
+            &&
+            (
+              extension === ".ai"
+              ||
+              extension === ".eps"
+              ||
+              extension === ".ps"
+              ||
+              extension === ".psd"
+              ||
+              extension === ".psb"
+            );
+
+
+          if (isVector) {
+
+            preloadVectorPreview(
+              nextFile.path
+            );
+
+            return;
+          }
+
+
+          /*
+           * PRESENTATION
+           */
+
+          if (
+            nextFile.category ===
+            "presentation"
+          ) {
+
+            preloadPresentation(
+              nextFile.path,
+              0,
+            );
+          }
+
+        },
+        700,
+      );
+
+
+    return () => {
+
+      window.clearTimeout(
+        timer
+      );
+
+    };
+
+  }, [
+    files,
+    currentIndex,
+  ]);
 
 
   /*
@@ -122,11 +226,9 @@ function Sorting({
         return;
       }
 
-
       onDelete?.(
-        currentFile,
+        currentFile
       );
-
     };
 
 
@@ -137,11 +239,9 @@ function Sorting({
         return;
       }
 
-
       onMove?.(
-        currentFile,
+        currentFile
       );
-
     };
 
 
@@ -152,11 +252,9 @@ function Sorting({
         return;
       }
 
-
       onSave?.(
-        currentFile,
+        currentFile
       );
-
     };
 
 
@@ -164,6 +262,10 @@ function Sorting({
    * =========================================================
    * KEYBOARD SHORTCUTS
    * =========================================================
+   *
+   * DELETE = Hapus
+   * M      = Pindah
+   * K      = Simpan
    */
 
   useEffect(() => {
@@ -175,7 +277,7 @@ function Sorting({
 
     const handleKeyDown =
       (
-        event: KeyboardEvent,
+        event: KeyboardEvent
       ) => {
 
         const target =
@@ -184,20 +286,24 @@ function Sorting({
 
 
         /*
-         * Jangan jalankan shortcut ketika
-         * user sedang mengetik.
+         * Jangan jalankan shortcut ketika user sedang
+         * mengetik pada input / textarea.
          */
 
         if (
-          target &&
+          target
+          &&
           (
             target.tagName ===
-              "INPUT" ||
+              "INPUT"
+            ||
             target.tagName ===
-              "TEXTAREA" ||
+              "TEXTAREA"
+            ||
             target.isContentEditable
           )
         ) {
+
           return;
         }
 
@@ -216,7 +322,6 @@ function Sorting({
           handleDelete();
 
           return;
-
         }
 
 
@@ -225,8 +330,8 @@ function Sorting({
          */
 
         if (
-          event.key.toLowerCase() ===
-          "m"
+          event.key.toLowerCase()
+          === "m"
         ) {
 
           event.preventDefault();
@@ -234,7 +339,6 @@ function Sorting({
           handleMove();
 
           return;
-
         }
 
 
@@ -243,14 +347,15 @@ function Sorting({
          */
 
         if (
-          event.key.toLowerCase() ===
-          "k"
+          event.key.toLowerCase()
+          === "k"
         ) {
 
           event.preventDefault();
 
           handleSave();
 
+          return;
         }
 
       };
@@ -285,14 +390,25 @@ function Sorting({
   if (!currentFile) {
 
     return (
-      <main className="sorting-page">
+      <main
+        className="sorting-page"
+      >
 
         <SortingHeader
           folderName={
             folderName
           }
+
           onBack={
             onBack
+          }
+
+          theme={
+            theme
+          }
+
+          onThemeToggle={
+            onThemeToggle
           }
         />
 
@@ -307,15 +423,16 @@ function Sorting({
 
 
           <p>
-            Folder ini tidak
-            memiliki file untuk
-            disortir.
+            Folder ini tidak memiliki
+            file untuk disortir.
           </p>
 
         </div>
 
 
-        <span className="sorting-version">
+        <span
+          className="sorting-version"
+        >
           Archio v1.0
         </span>
 
@@ -353,46 +470,37 @@ function Sorting({
    */
 
   return (
-    <main className="sorting-page">
-
-
-      {/* =====================================================
-          HEADER
-          
-          FULL WIDTH WINDOW.
-          TIDAK DI-SCALE.
-      ===================================================== */}
+    <main
+      className="sorting-page"
+    >
 
       <SortingHeader
         folderName={
           folderName
         }
+
         onBack={
           onBack
+        }
+
+        theme={
+          theme
+        }
+
+        onThemeToggle={
+          onThemeToggle
         }
       />
 
 
-      {/* =====================================================
-          CONTENT VIEWPORT
-          
-          Berada tepat di bawah header.
-          
-          Gap header → progress diatur oleh
-          padding-top pada sorting-fit.css.
-      ===================================================== */}
-
       <div
-        className="sorting-content-viewport"
+        className=
+          "sorting-content-viewport"
       >
 
-
-        {/* ===================================================
-            SCALED CANVAS
-        =================================================== */}
-
         <div
-          className="sorting-stage-shell"
+          className=
+            "sorting-stage-shell"
           style={{
             width:
               width || 1005,
@@ -404,37 +512,32 @@ function Sorting({
 
           <div
             ref={stageRef}
-            className="sorting-stage"
+            className=
+              "sorting-stage"
             style={{
               transform:
                 `scale(${scale})`,
             }}
           >
 
-
-            {/* ===============================================
-                PROGRESS
-            =============================================== */}
-
             <SortingProgress
               current={
                 currentFileNumber
               }
+
               total={
                 totalFiles
               }
+
               remaining={
                 remainingFiles
               }
             />
 
 
-            {/* ===============================================
-                PREVIEW
-            =============================================== */}
-
             <section
-              className="sorting-preview"
+              className=
+                "sorting-preview"
             >
 
               <PreviewResolver
@@ -446,10 +549,6 @@ function Sorting({
             </section>
 
 
-            {/* ===============================================
-                FILE INFO
-            =============================================== */}
-
             <FileInfo
               file={
                 currentFile
@@ -457,17 +556,19 @@ function Sorting({
             />
 
 
-            {/* ===============================================
-                ACTION BAR
-            =============================================== */}
+            {/*
+             * ACTION BAR SENGAJA TIDAK DIUBAH
+             */}
 
             <ActionBar
               onDelete={
                 handleDelete
               }
+
               onMove={
                 handleMove
               }
+
               onSave={
                 handleSave
               }
@@ -480,17 +581,12 @@ function Sorting({
       </div>
 
 
-      {/* =====================================================
-          VERSION
-          
-          FIXED KE WINDOW.
-          TIDAK IKUT SCALE.
-      ===================================================== */}
-
-      <span className="sorting-version">
+      <span
+        className=
+          "sorting-version"
+      >
         Archio v1.0
       </span>
-
 
     </main>
   );

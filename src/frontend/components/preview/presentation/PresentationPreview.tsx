@@ -6,13 +6,19 @@ import {
   type MouseEvent,
 } from "react";
 
-import { renderPresentation } from "../../../services/presentationService";
-import FullscreenButton from "../common/FullscreenButton";
+import {
+  renderPresentation,
+} from "../../../services/presentationService";
+
+import FullscreenButton
+  from "../common/FullscreenButton";
+
 
 interface PresentationSlide {
   index: number;
   image: string;
 }
+
 
 interface PresentationPreviewResult {
   fileName: string;
@@ -26,55 +32,80 @@ interface PresentationPreviewResult {
   };
 }
 
+
 interface PresentationPreviewProps {
   src: string;
   fileName: string;
 }
 
+
 const THUMBNAIL_COUNT = 4;
+
 
 export default function PresentationPreview({
   src,
   fileName,
 }: PresentationPreviewProps) {
+
   /* =========================================================
      THEME
   ========================================================= */
 
-  const [isDarkTheme, setIsDarkTheme] = useState(
+  const [
+    isDarkTheme,
+    setIsDarkTheme,
+  ] = useState(
     () =>
       document.documentElement.dataset.theme ===
       "dark",
   );
 
+
   useEffect(() => {
+
     const root =
       document.documentElement;
 
+
     const updateTheme = () => {
+
       setIsDarkTheme(
-        root.dataset.theme === "dark",
+        root.dataset.theme ===
+        "dark",
       );
+
     };
 
+
     updateTheme();
+
 
     const observer =
       new MutationObserver(
         updateTheme,
       );
 
-    observer.observe(root, {
-      attributes: true,
-      attributeFilter: [
-        "data-theme",
-      ],
-    });
+
+    observer.observe(
+      root,
+      {
+        attributes: true,
+
+        attributeFilter: [
+          "data-theme",
+        ],
+      },
+    );
+
 
     return () => {
+
       observer.disconnect();
+
     };
+
   }, []);
+
 
   /* =========================================================
      THEME COLORS
@@ -85,120 +116,170 @@ export default function PresentationPreview({
       ? "#272727"
       : "#ffffff";
 
+
   const outerFullscreenBackground =
     isDarkTheme
       ? "#1f1f1f"
       : "#ffffff";
+
 
   const loadingTextColor =
     isDarkTheme
       ? "#bdbdbd"
       : "#555555";
 
+
   const loadingSubtitleColor =
     isDarkTheme
       ? "#777777"
       : "#999999";
+
 
   const spinnerBorder =
     isDarkTheme
       ? "2px solid rgba(255,255,255,0.15)"
       : "2px solid rgba(0,0,0,0.12)";
 
+
   const spinnerBorderTop =
     isDarkTheme
       ? "2px solid #ffffff"
       : "2px solid #555555";
+
 
   const thumbnailBackground =
     isDarkTheme
       ? "#1f1f1f"
       : "#eeeeee";
 
+
   const thumbnailBorder =
     isDarkTheme
       ? "1px solid rgba(255,255,255,0.12)"
       : "1px solid rgba(0,0,0,0.10)";
+
 
   const thumbnailActiveBorder =
     isDarkTheme
       ? "2px solid #ffffff"
       : "2px solid #555555";
 
+
   const thumbnailSpinnerBorder =
     isDarkTheme
       ? "2px solid rgba(255,255,255,0.18)"
       : "2px solid rgba(0,0,0,0.12)";
+
 
   const thumbnailSpinnerTop =
     isDarkTheme
       ? "2px solid #ffffff"
       : "2px solid #555555";
 
+
   const thumbnailLoadingTextColor =
     isDarkTheme
       ? "rgba(255,255,255,0.45)"
       : "#888888";
+
 
   const slideCounterColor =
     isDarkTheme
       ? "#ffffff"
       : "#333333";
 
+
   const progressBackground =
     isDarkTheme
       ? "rgba(255,255,255,0.16)"
       : "rgba(0,0,0,0.14)";
+
 
   const progressFillColor =
     isDarkTheme
       ? "#ffffff"
       : "#666666";
 
+
   const navigationButtonBackground =
     isDarkTheme
       ? "rgba(255,255,255,0.08)"
       : "rgba(0,0,0,0.08)";
+
 
   const navigationButtonColor =
     isDarkTheme
       ? "#ffffff"
       : "#333333";
 
+
   /* =========================================================
      STATE
   ========================================================= */
 
-  const [result, setResult] =
+  const [
+    result,
+    setResult,
+  ] =
     useState<PresentationPreviewResult | null>(
       null,
     );
 
-  const [currentSlide, setCurrentSlide] =
-    useState(0);
 
-  const [displayedSlide, setDisplayedSlide] =
+  const [
+    currentSlide,
+    setCurrentSlide,
+  ] = useState(0);
+
+
+  const [
+    displayedSlide,
+    setDisplayedSlide,
+  ] =
     useState<PresentationSlide | null>(
       null,
     );
 
-  const [error, setError] =
-    useState<string | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [
+    error,
+    setError,
+  ] = useState<string | null>(
+    null,
+  );
 
-  const [slideLoading, setSlideLoading] =
-    useState(false);
 
-  const [renderTime, setRenderTime] =
-    useState<number | null>(null);
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-  const [isFullscreen, setIsFullscreen] =
-    useState(false);
+
+  const [
+    slideLoading,
+    setSlideLoading,
+  ] = useState(false);
+
+
+  const [
+    renderTime,
+    setRenderTime,
+  ] = useState<number | null>(
+    null,
+  );
+
+
+  const [
+    isFullscreen,
+    setIsFullscreen,
+  ] = useState(false);
+
 
   const containerRef =
-    useRef<HTMLDivElement>(null);
+    useRef<HTMLDivElement>(
+      null,
+    );
+
 
   /* =========================================================
      SLIDE CACHE
@@ -207,7 +288,10 @@ export default function PresentationPreview({
   const slideCacheRef =
     useRef<
       Map<number, PresentationSlide>
-    >(new Map());
+    >(
+      new Map(),
+    );
+
 
   /* =========================================================
      REQUEST ID
@@ -216,34 +300,50 @@ export default function PresentationPreview({
   const renderRequestRef =
     useRef(0);
 
+
   /* =========================================================
      LOAD PRESENTATION
   ========================================================= */
 
   useEffect(() => {
+
     let cancelled = false;
+
 
     slideCacheRef.current.clear();
 
+
     setResult(null);
+
     setCurrentSlide(0);
+
     setDisplayedSlide(null);
+
     setError(null);
+
     setLoading(true);
+
     setSlideLoading(false);
+
     setRenderTime(null);
 
+
     async function loadPresentation() {
+
       const startTime =
         performance.now();
+
 
       const requestId =
         ++renderRequestRef.current;
 
+
       try {
+
         console.time(
           "[PresentationPreview] Initial render",
         );
+
 
         const parsedResult =
           await renderPresentation(
@@ -251,13 +351,16 @@ export default function PresentationPreview({
             0,
           );
 
+
         const elapsed =
           performance.now() -
           startTime;
 
+
         console.timeEnd(
           "[PresentationPreview] Initial render",
         );
+
 
         console.log(
           `[PresentationPreview] Initial render selesai dalam ${elapsed.toFixed(
@@ -267,17 +370,22 @@ export default function PresentationPreview({
           ).toFixed(2)} s)`,
         );
 
+
         if (
           cancelled ||
           requestId !==
             renderRequestRef.current
         ) {
+
           return;
+
         }
+
 
         setResult(
           parsedResult,
         );
+
 
         const firstSlide =
           parsedResult.slides?.find(
@@ -286,28 +394,41 @@ export default function PresentationPreview({
           ) ??
           parsedResult.slides?.[0];
 
+
         if (firstSlide) {
+
           slideCacheRef.current.set(
             firstSlide.index,
             firstSlide,
           );
 
+
           setDisplayedSlide(
             firstSlide,
           );
+
         }
 
+
         setCurrentSlide(0);
-        setRenderTime(elapsed);
+
+        setRenderTime(
+          elapsed,
+        );
+
         setError(null);
+
       } catch (err) {
+
         const elapsed =
           performance.now() -
           startTime;
 
+
         console.timeEnd(
           "[PresentationPreview] Initial render",
         );
+
 
         console.error(
           `[PresentationPreview] Render gagal setelah ${elapsed.toFixed(
@@ -315,72 +436,113 @@ export default function PresentationPreview({
           )} ms`,
         );
 
-        console.error(err);
+
+        console.error(
+          err,
+        );
+
 
         if (!cancelled) {
+
           setError(
             err instanceof Error
               ? err.message
               : String(err),
           );
 
+
           setRenderTime(
             elapsed,
           );
+
         }
+
       } finally {
+
         if (!cancelled) {
+
           setLoading(false);
+
         }
+
       }
+
     }
+
 
     void loadPresentation();
 
+
     return () => {
+
       cancelled = true;
+
     };
-  }, [src]);
+
+  }, [
+    src,
+  ]);
+
 
   /* =========================================================
      RENDER SINGLE SLIDE
   ========================================================= */
 
   useEffect(() => {
+
     if (!result) {
+
       return;
+
     }
+
 
     const totalSlideCount =
       result.totalSlides;
+
 
     const cachedSlide =
       slideCacheRef.current.get(
         currentSlide,
       );
 
+
     if (cachedSlide) {
+
       setDisplayedSlide(
         cachedSlide,
       );
 
-      setSlideLoading(false);
+
+      setSlideLoading(
+        false,
+      );
+
 
       return;
+
     }
 
+
     let cancelled = false;
+
 
     const requestId =
       ++renderRequestRef.current;
 
+
     async function loadSlide() {
+
       const startTime =
         performance.now();
 
+
       try {
+
         setSlideLoading(true);
+
         setError(null);
+
 
         console.log(
           `[PresentationPreview] Rendering slide ${
@@ -388,23 +550,29 @@ export default function PresentationPreview({
           }/${totalSlideCount}...`,
         );
 
+
         const slideResult =
           await renderPresentation(
             src,
             currentSlide,
           );
 
+
         const elapsed =
           performance.now() -
           startTime;
+
 
         if (
           cancelled ||
           requestId !==
             renderRequestRef.current
         ) {
+
           return;
+
         }
+
 
         const slide =
           slideResult.slides?.find(
@@ -414,22 +582,28 @@ export default function PresentationPreview({
           ) ??
           slideResult.slides?.[0];
 
+
         if (!slide) {
+
           throw new Error(
             `Slide ${
               currentSlide + 1
             } tidak berhasil dirender.`,
           );
+
         }
+
 
         slideCacheRef.current.set(
           slide.index,
           slide,
         );
 
+
         setDisplayedSlide(
           slide,
         );
+
 
         console.log(
           `[PresentationPreview] Slide ${
@@ -438,46 +612,66 @@ export default function PresentationPreview({
             0,
           )} ms`,
         );
+
       } catch (err) {
+
         if (
           cancelled ||
           requestId !==
             renderRequestRef.current
         ) {
+
           return;
+
         }
+
 
         console.error(
           "[PresentationPreview] Slide render gagal:",
           err,
         );
 
+
         setError(
           err instanceof Error
             ? err.message
             : String(err),
         );
+
       } finally {
+
         if (
           !cancelled &&
           requestId ===
             renderRequestRef.current
         ) {
-          setSlideLoading(false);
+
+          setSlideLoading(
+            false,
+          );
+
         }
+
       }
+
     }
+
 
     void loadSlide();
 
+
     return () => {
+
       cancelled = true;
+
     };
+
   }, [
     currentSlide,
     result,
     src,
   ]);
+
 
   /* =========================================================
      DATA
@@ -486,85 +680,120 @@ export default function PresentationPreview({
   const totalSlides =
     result?.totalSlides ?? 0;
 
+
   /* =========================================================
      THUMBNAIL WINDOW
   ========================================================= */
 
   let thumbnailStart = 0;
 
+
   if (
     totalSlides >
     THUMBNAIL_COUNT
   ) {
+
     thumbnailStart =
       Math.min(
         currentSlide -
-          (THUMBNAIL_COUNT - 1),
+          (
+            THUMBNAIL_COUNT -
+            1
+          ),
         totalSlides -
           THUMBNAIL_COUNT,
       );
+
 
     thumbnailStart =
       Math.max(
         0,
         thumbnailStart,
       );
+
   }
+
 
   /* =========================================================
      NAVIGATION
   ========================================================= */
 
   const goPrevious =
-    useCallback(() => {
-      if (
-        totalSlides === 0
-      ) {
-        return;
-      }
+    useCallback(
+      () => {
 
-      setCurrentSlide(
-        (current) =>
-          current > 0
-            ? current - 1
-            : totalSlides - 1,
-      );
-    }, [
-      totalSlides,
-    ]);
+        if (
+          totalSlides ===
+          0
+        ) {
+
+          return;
+
+        }
+
+
+        setCurrentSlide(
+          (current) =>
+            current > 0
+              ? current - 1
+              : totalSlides - 1,
+        );
+
+      },
+      [
+        totalSlides,
+      ],
+    );
+
 
   const goNext =
-    useCallback(() => {
-      if (
-        totalSlides === 0
-      ) {
-        return;
-      }
+    useCallback(
+      () => {
 
-      setCurrentSlide(
-        (current) =>
-          current <
-          totalSlides - 1
-            ? current + 1
-            : 0,
-      );
-    }, [
-      totalSlides,
-    ]);
+        if (
+          totalSlides ===
+          0
+        ) {
+
+          return;
+
+        }
+
+
+        setCurrentSlide(
+          (current) =>
+            current <
+            totalSlides - 1
+              ? current + 1
+              : 0,
+        );
+
+      },
+      [
+        totalSlides,
+      ],
+    );
+
 
   /* =========================================================
      KEYBOARD
   ========================================================= */
 
   useEffect(() => {
+
     function handleKeyboard(
       event: KeyboardEvent,
     ) {
+
       if (
-        totalSlides === 0
+        totalSlides ===
+        0
       ) {
+
         return;
+
       }
+
 
       if (
         event.target instanceof
@@ -574,55 +803,78 @@ export default function PresentationPreview({
         (
           event.target instanceof
             HTMLElement &&
-          event.target.isContentEditable
+          event.target
+            .isContentEditable
         )
       ) {
+
         return;
+
       }
+
 
       if (
         event.key ===
         "ArrowLeft"
       ) {
+
         event.preventDefault();
+
         goPrevious();
+
         return;
+
       }
+
 
       if (
         event.key ===
         "ArrowRight"
       ) {
+
         event.preventDefault();
+
         goNext();
+
         return;
+
       }
+
 
       if (
         event.key ===
           "Escape" &&
         document.fullscreenElement
       ) {
+
         void document.exitFullscreen();
+
       }
+
     }
+
 
     window.addEventListener(
       "keydown",
       handleKeyboard,
     );
 
+
     return () => {
+
       window.removeEventListener(
         "keydown",
         handleKeyboard,
       );
+
     };
+
   }, [
     totalSlides,
     goPrevious,
     goNext,
   ]);
+
 
   /* =========================================================
      PROGRESS
@@ -634,6 +886,7 @@ export default function PresentationPreview({
         (totalSlides - 1)
       : 0;
 
+
   /* =========================================================
      PROGRESS CLICK
   ========================================================= */
@@ -641,18 +894,25 @@ export default function PresentationPreview({
   const handleProgressClick = (
     event: MouseEvent<HTMLDivElement>,
   ) => {
+
     if (
-      totalSlides <= 1
+      totalSlides <=
+      1
     ) {
+
       return;
+
     }
+
 
     const rect =
       event.currentTarget.getBoundingClientRect();
 
+
     const position =
       event.clientX -
       rect.left;
+
 
     const ratio =
       Math.max(
@@ -664,16 +924,23 @@ export default function PresentationPreview({
         ),
       );
 
+
     const slide =
       Math.round(
         ratio *
-          (totalSlides - 1),
+          (
+            totalSlides -
+            1
+          ),
       );
+
 
     setCurrentSlide(
       slide,
     );
+
   };
+
 
   /* =========================================================
      RENDER
@@ -690,9 +957,10 @@ export default function PresentationPreview({
       style={{
         width: "100%",
 
-        height: isFullscreen
-          ? "100vh"
-          : "auto",
+        height:
+          isFullscreen
+            ? "100vh"
+            : "auto",
 
         background:
           isFullscreen
@@ -719,6 +987,7 @@ export default function PresentationPreview({
             : "visible",
       }}
     >
+
       {/* ====================================================
           PRESENTATION CARD
       ==================================================== */}
@@ -727,14 +996,11 @@ export default function PresentationPreview({
         style={{
           width: "100%",
 
-          height: isFullscreen
-            ? "100vh"
-            : "562px",
+          height:
+            isFullscreen
+              ? "100vh"
+              : "562px",
 
-          /*
-           * LIGHT  = WHITE
-           * DARK   = #272727
-           */
           background:
             viewerBackground,
 
@@ -754,28 +1020,32 @@ export default function PresentationPreview({
           boxSizing:
             "border-box",
 
-          padding: isFullscreen
-            ? "32px 48px 24px"
-            : "24px 32px 18px",
+          padding:
+            isFullscreen
+              ? "32px 48px 24px"
+              : "24px 32px 18px",
 
-          overflow: "hidden",
+          overflow:
+            "hidden",
 
-          position: "relative",
+          position:
+            "relative",
 
           transition:
             "background-color 0.2s ease",
         }}
       >
+
         {/* ====================================================
             FULLSCREEN BUTTON
         ==================================================== */}
 
         <FullscreenButton
-          targetRef={containerRef}
-          onFullscreenChange={
-            setIsFullscreen
+          targetRef={
+            containerRef
           }
         />
+
 
         {/* ====================================================
             INITIAL LOADING
@@ -807,6 +1077,7 @@ export default function PresentationPreview({
               gap: "12px",
             }}
           >
+
             <div
               style={{
                 width: "22px",
@@ -827,10 +1098,12 @@ export default function PresentationPreview({
               }}
             />
 
+
             <div>
               Rendering
               presentation...
             </div>
+
 
             <div
               style={{
@@ -843,6 +1116,7 @@ export default function PresentationPreview({
             >
               Preparing slide 1
             </div>
+
 
             <style>
               {`
@@ -857,8 +1131,10 @@ export default function PresentationPreview({
                 }
               `}
             </style>
+
           </div>
         )}
+
 
         {/* ====================================================
             ERROR
@@ -902,9 +1178,11 @@ export default function PresentationPreview({
                 gap: "10px",
               }}
             >
+
               <div>
                 Preview unavailable
               </div>
+
 
               <div
                 style={{
@@ -925,6 +1203,7 @@ export default function PresentationPreview({
               >
                 {error}
               </div>
+
 
               {renderTime !==
                 null && (
@@ -947,8 +1226,10 @@ export default function PresentationPreview({
                   s
                 </div>
               )}
+
             </div>
           )}
+
 
         {/* ====================================================
             PRESENTATION
@@ -958,6 +1239,7 @@ export default function PresentationPreview({
           result &&
           displayedSlide && (
             <>
+
               {/* ==============================================
                   MAIN SLIDE
               ============================================== */}
@@ -985,6 +1267,7 @@ export default function PresentationPreview({
                     "hidden",
                 }}
               >
+
                 <img
                   src={
                     displayedSlide.image
@@ -1020,6 +1303,7 @@ export default function PresentationPreview({
                   }}
                 />
 
+
                 {/* RENDERING OVERLAY */}
 
                 {slideLoading && (
@@ -1050,6 +1334,7 @@ export default function PresentationPreview({
                         "blur(2px)",
                     }}
                   >
+
                     <div
                       style={{
                         display:
@@ -1079,12 +1364,14 @@ export default function PresentationPreview({
                         fontSize:
                           "13px",
 
-                        fontWeight: 500,
+                        fontWeight:
+                          500,
 
                         boxShadow:
                           "0 4px 20px rgba(0,0,0,0.18)",
                       }}
                     >
+
                       <div
                         style={{
                           width:
@@ -1116,9 +1403,12 @@ export default function PresentationPreview({
                       {currentSlide +
                         1}
                       ...
+
                     </div>
+
                   </div>
                 )}
+
 
                 {/* RENDER ERROR */}
 
@@ -1162,7 +1452,9 @@ export default function PresentationPreview({
                       {error}
                     </div>
                   )}
+
               </div>
+
 
               {/* ==============================================
                   THUMBNAILS
@@ -1190,6 +1482,7 @@ export default function PresentationPreview({
                   flexShrink: 0,
                 }}
               >
+
                 {Array.from({
                   length:
                     Math.min(
@@ -1201,18 +1494,22 @@ export default function PresentationPreview({
                     _,
                     slotIndex,
                   ) => {
+
                     const slideIndex =
                       thumbnailStart +
                       slotIndex;
+
 
                     const slide =
                       slideCacheRef.current.get(
                         slideIndex,
                       );
 
+
                     const active =
                       slideIndex ===
                       currentSlide;
+
 
                     return (
                       <button
@@ -1287,6 +1584,7 @@ export default function PresentationPreview({
                             "relative",
                         }}
                       >
+
                         {slide ? (
                           <img
                             src={
@@ -1315,6 +1613,7 @@ export default function PresentationPreview({
                           />
                         ) : (
                           <>
+
                             <div
                               style={{
                                 width:
@@ -1336,6 +1635,7 @@ export default function PresentationPreview({
                                   "archio-presentation-spin 0.8s linear infinite",
                               }}
                             />
+
 
                             <span
                               style={{
@@ -1361,13 +1661,18 @@ export default function PresentationPreview({
                             >
                               Rendering...
                             </span>
+
                           </>
                         )}
+
                       </button>
                     );
+
                   },
                 )}
+
               </div>
+
 
               {/* ==============================================
                   NAVIGATION
@@ -1390,6 +1695,7 @@ export default function PresentationPreview({
                   flexShrink: 0,
                 }}
               >
+
                 {/* SLIDE COUNTER */}
 
                 <div
@@ -1439,6 +1745,7 @@ export default function PresentationPreview({
                   {totalSlides}
                 </div>
 
+
                 {/* PROGRESS BAR */}
 
                 <div
@@ -1447,11 +1754,13 @@ export default function PresentationPreview({
                   }
                   role="progressbar"
                   aria-valuemin={0}
-                  aria-valuemax={Math.max(
-                    totalSlides -
-                      1,
-                    0,
-                  )}
+                  aria-valuemax={
+                    Math.max(
+                      totalSlides -
+                        1,
+                      0,
+                    )
+                  }
                   aria-valuenow={
                     currentSlide
                   }
@@ -1469,7 +1778,8 @@ export default function PresentationPreview({
                     width:
                       "120px",
 
-                    height: "4px",
+                    height:
+                      "4px",
 
                     background:
                       progressBackground,
@@ -1487,6 +1797,7 @@ export default function PresentationPreview({
                         : "default",
                   }}
                 >
+
                   <div
                     style={{
                       width: `${
@@ -1507,7 +1818,9 @@ export default function PresentationPreview({
                         "width 0.15s ease",
                     }}
                   />
+
                 </div>
+
 
                 {/* PREVIOUS */}
 
@@ -1569,6 +1882,7 @@ export default function PresentationPreview({
                   ‹
                 </button>
 
+
                 {/* NEXT */}
 
                 <button
@@ -1628,9 +1942,12 @@ export default function PresentationPreview({
                 >
                   ›
                 </button>
+
               </div>
+
             </>
           )}
+
 
         {/* ====================================================
             NO SLIDES
@@ -1667,7 +1984,9 @@ export default function PresentationPreview({
               dapat ditampilkan.
             </div>
           )}
+
       </div>
+
     </div>
   );
 }

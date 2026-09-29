@@ -3,114 +3,168 @@ import {
   useState,
 } from "react";
 
+import type {
+  MouseEvent,
+} from "react";
 
-type Theme =
+
+export type Theme =
   | "light"
   | "dark";
 
 
+interface ThemeToggleProps {
+
+  theme?: Theme;
+
+  onToggle?: (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void;
+
+}
+
+
 function getInitialTheme(): Theme {
+
   try {
+
     const savedTheme =
       localStorage.getItem(
         "archio-theme",
       );
 
 
-    if (
-      savedTheme === "dark"
-    ) {
-      return "dark";
-    }
-
-
-    return "light";
+    return savedTheme === "dark"
+      ? "dark"
+      : "light";
 
   } catch {
+
     return "light";
+
   }
+
 }
 
 
 function applyTheme(
   theme: Theme,
 ) {
-  const root =
-    document.documentElement;
 
-  const body =
-    document.body;
-
-
-  root.dataset.theme =
+  document.documentElement.dataset.theme =
     theme;
 
-  body.dataset.theme =
+  document.body.dataset.theme =
     theme;
 
-
-  root.style.colorScheme =
+  document.documentElement.style.colorScheme =
     theme;
 
 
   try {
+
     localStorage.setItem(
       "archio-theme",
       theme,
     );
+
   } catch {
-    // Ignore localStorage errors.
+    // Ignore.
   }
+
 }
 
 
-function ThemeToggle() {
-  const [theme, setTheme] =
-    useState<Theme>(
-      getInitialTheme,
-    );
+function ThemeToggle({
+  theme,
+  onToggle,
+}: ThemeToggleProps) {
+
+  const [
+    internalTheme,
+    setInternalTheme,
+  ] = useState<Theme>(
+    getInitialTheme,
+  );
+
+
+  const isControlled =
+    theme !== undefined &&
+    onToggle !== undefined;
+
+
+  const currentTheme =
+    isControlled
+      ? theme
+      : internalTheme;
 
 
   const isDark =
-    theme === "dark";
+    currentTheme === "dark";
 
-
-  /* =======================================================
-     APPLY INITIAL THEME
-  ======================================================= */
 
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
 
+    if (!isControlled) {
 
-  /* =======================================================
-     CLEANUP
-  ======================================================= */
+      applyTheme(
+        internalTheme,
+      );
+
+    }
+
+  }, [
+    internalTheme,
+    isControlled,
+  ]);
+
 
   useEffect(() => {
-    return () => {
-      document.body.dataset.theme =
-        "";
 
-      document.documentElement.dataset.theme =
-        "";
-    };
-  }, []);
+    if (
+      isControlled &&
+      theme !== undefined
+    ) {
 
+      applyTheme(
+        theme,
+      );
 
-  /* =======================================================
-     TOGGLE
-  ======================================================= */
+    }
+
+  }, [
+    theme,
+    isControlled,
+  ]);
+
 
   const handleToggle =
-    () => {
-      setTheme(
-        (previous) =>
-          previous === "dark"
+    (
+      event:
+        MouseEvent<HTMLButtonElement>,
+    ) => {
+
+      if (
+        isControlled &&
+        onToggle
+      ) {
+
+        onToggle(
+          event,
+        );
+
+        return;
+
+      }
+
+
+      setInternalTheme(
+        (previousTheme) =>
+          previousTheme === "dark"
             ? "light"
             : "dark",
       );
+
     };
 
 
@@ -141,19 +195,19 @@ function ThemeToggle() {
         }`}
       >
 
-        {/* SUN */}
-
         <span
           className="
             theme-toggle-icon
             theme-toggle-sun
           "
         >
+
           <svg
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
           >
+
             <circle
               cx="12"
               cy="12"
@@ -193,11 +247,11 @@ function ThemeToggle() {
               strokeWidth="1.8"
               strokeLinecap="round"
             />
+
           </svg>
+
         </span>
 
-
-        {/* MOON */}
 
         <span
           className="
@@ -205,11 +259,13 @@ function ThemeToggle() {
             theme-toggle-moon
           "
         >
+
           <svg
             viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden="true"
           >
+
             <path
               d="
                 M21 14.5
@@ -221,11 +277,11 @@ function ThemeToggle() {
                 C16.45 21 19.9 18.25 21 14.5Z
               "
             />
+
           </svg>
+
         </span>
 
-
-        {/* THUMB */}
 
         <span
           className={`theme-toggle-thumb ${
@@ -239,6 +295,7 @@ function ThemeToggle() {
 
     </button>
   );
+
 }
 
 

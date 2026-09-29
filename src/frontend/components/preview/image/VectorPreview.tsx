@@ -1,7 +1,17 @@
-import { useEffect, useState } from "react";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  convertFileSrc,
+} from "@tauri-apps/api/core";
 
 import ImagePreview from "./ImagePreview";
+
+import {
+  renderVectorPreview,
+} from "../../../services/vectorService";
 
 interface VectorPreviewProps {
   filePath: string;
@@ -14,8 +24,15 @@ function VectorPreview({
   fileName,
   extension,
 }: VectorPreviewProps) {
-  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [
+    previewSrc,
+    setPreviewSrc,
+  ] = useState<string | null>(null);
+
+  const [
+    error,
+    setError,
+  ] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,19 +42,19 @@ function VectorPreview({
         setPreviewSrc(null);
         setError(null);
 
-        const renderedPath = await invoke<string>(
-          "render_image_preview",
-          {
+        const renderedPath =
+          await renderVectorPreview(
             filePath,
-          },
-        );
+          );
 
         if (cancelled) {
           return;
         }
 
         setPreviewSrc(
-          convertFileSrc(renderedPath),
+          convertFileSrc(
+            renderedPath,
+          ),
         );
       } catch (renderError) {
         console.error(
@@ -57,7 +74,7 @@ function VectorPreview({
       }
     }
 
-    render();
+    void render();
 
     return () => {
       cancelled = true;
@@ -79,12 +96,14 @@ function VectorPreview({
               strokeWidth="1.8"
               strokeLinecap="round"
             />
+
             <path
               d="M12 17H12.01"
               stroke="currentColor"
               strokeWidth="2.2"
               strokeLinecap="round"
             />
+
             <path
               d="M10.3 4.7L3.4 17C2.7 18.3 3.7 20 5.2 20H18.8C20.3 20 21.3 18.3 20.6 17L13.7 4.7C13 3.4 11 3.4 10.3 4.7Z"
               stroke="currentColor"
@@ -99,7 +118,9 @@ function VectorPreview({
         </div>
 
         <div className="vector-preview-error-text">
-          File {extension.toUpperCase()} tidak dapat dirender.
+          File{" "}
+          {extension.toUpperCase()}{" "}
+          tidak dapat dirender.
         </div>
 
         <div className="vector-preview-error-detail">
@@ -113,7 +134,10 @@ function VectorPreview({
     return (
       <div className="vector-preview-loading">
         <div className="vector-preview-spinner" />
-        <span>Menyiapkan preview...</span>
+
+        <span>
+          Menyiapkan preview...
+        </span>
       </div>
     );
   }
