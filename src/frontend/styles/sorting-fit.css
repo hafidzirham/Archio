@@ -1,0 +1,662 @@
+/* =========================================================
+   ARCHIO
+   SORTING FIT
+   DESKTOP APPLICATION RESPONSIVE LAYOUT
+
+   IMPORTANT:
+   - Header tidak di-scale.
+   - Content canvas di-scale secara proporsional.
+   - Tidak ada page scrollbar.
+   - ActionBar tidak diatur di file ini.
+========================================================= */
+
+
+/* =========================================================
+   ROOT WINDOW
+========================================================= */
+
+.sorting-page {
+  width: 100% !important;
+
+  height: 100dvh !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  position: relative;
+
+  display: flex !important;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  overflow: hidden !important;
+}
+
+
+/* =========================================================
+   HEADER
+
+   Header selalu mengikuti ukuran window.
+   Tidak ikut scaling canvas.
+========================================================= */
+
+.sorting-page
+.sorting-header {
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  height: 64px !important;
+  min-height: 64px !important;
+
+  flex: 0 0 64px !important;
+
+  position: relative;
+
+  box-sizing: border-box;
+
+  border-bottom: none !important;
+}
+
+
+/* =========================================================
+   HEADER LEFT
+========================================================= */
+
+.sorting-page
+.sorting-header-left {
+  left: 60px !important;
+}
+
+
+/* =========================================================
+   HEADER RIGHT
+========================================================= */
+
+.sorting-page
+.sorting-header-right {
+  right: 60px !important;
+}
+
+
+/* =========================================================
+   CONTENT VIEWPORT
+
+   Area ini berada DI BAWAH header.
+
+   Header tidak masuk ke area scaling.
+
+   Gap atas 22px memberikan jarak yang jelas
+   antara header dan progress bar.
+========================================================= */
+
+.sorting-content-viewport {
+  width: 100%;
+
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  padding:
+    22px
+    24px
+    16px;
+
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   SCALE SHELL
+========================================================= */
+
+.sorting-stage-shell {
+  position: relative;
+
+  flex: 0 0 auto;
+
+  overflow: visible;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   DESIGN CANVAS
+
+   Ukuran natural canvas.
+
+   Canvas ini yang akan diperkecil oleh transform scale.
+========================================================= */
+
+.sorting-stage {
+  width: 1005px;
+
+  min-width: 1005px;
+
+  position: relative;
+
+  transform-origin:
+    top left;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PROGRESS
+
+   Progress tetap menjadi bagian dari canvas.
+   Jarak ke preview tetap menggunakan CSS dasar sorting.css.
+========================================================= */
+
+.sorting-stage
+.sorting-progress {
+  width: 1005px !important;
+
+  max-width: 1005px !important;
+
+  min-width: 1005px !important;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PREVIEW
+
+   IMPORTANT:
+   Wrapper preview harus mengikuti theme.
+
+   Ini mencegah background dari sorting.css
+   muncul di belakang rounded corner preview.
+========================================================= */
+
+.sorting-stage
+.sorting-preview {
+  width: 1005px !important;
+
+  max-width: 1005px !important;
+
+  min-width: 1005px !important;
+
+  height: 562px !important;
+
+  min-height: 562px !important;
+
+  max-height: 562px !important;
+
+  flex: 0 0 562px !important;
+
+  aspect-ratio:
+    auto !important;
+
+  box-sizing: border-box;
+
+  position: relative;
+
+  /*
+   * Jangan gunakan border.
+   * Background akan disesuaikan berdasarkan theme.
+   */
+  border: none !important;
+
+  outline: none !important;
+
+  /*
+   * Penting untuk mencegah background
+   * wrapper terlihat di sudut preview.
+   */
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   PREVIEW CHILD
+========================================================= */
+
+.sorting-stage
+.sorting-preview > * {
+  width: 100% !important;
+
+  height: 100% !important;
+
+  min-width: 0 !important;
+
+  min-height: 0 !important;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   FILE INFO
+========================================================= */
+
+.sorting-stage
+.file-info {
+  width: 1005px !important;
+
+  max-width: 1005px !important;
+
+  min-width: 1005px !important;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   FILE NAME
+========================================================= */
+
+.sorting-stage
+.file-info-name {
+  max-width: 92% !important;
+}
+
+
+/* =========================================================
+   ACTION BAR
+
+   SENGAJA TIDAK ADA OVERRIDE UKURAN DI SINI.
+
+   Styling ActionBar dikembalikan sepenuhnya ke
+   sorting.css.
+
+   Jadi:
+   Hapus / Pindah / Simpan
+   tidak disentuh oleh responsive canvas.
+========================================================= */
+
+
+/* =========================================================
+   VERSION
+
+   Version bukan bagian canvas.
+
+   Tetap menempel ke window.
+========================================================= */
+
+.sorting-page
+.sorting-version {
+  position: fixed !important;
+
+  right: 24px !important;
+
+  bottom: 16px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 11px !important;
+
+  line-height: 1 !important;
+
+  white-space: nowrap;
+
+  z-index: 500;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.sorting-empty {
+  width: 100%;
+
+  height:
+    calc(
+      100dvh - 64px
+    );
+
+  min-height: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: column;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   FULLSCREEN PREVIEW
+========================================================= */
+
+.sorting-stage
+:fullscreen {
+  transform:
+    none !important;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (
+  max-width: 900px
+) {
+
+  .sorting-page
+  .sorting-header-left {
+    left: 32px !important;
+  }
+
+
+  .sorting-page
+  .sorting-header-right {
+    right: 32px !important;
+  }
+
+
+  .sorting-content-viewport {
+    padding:
+      20px
+      20px
+      14px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL WINDOW
+========================================================= */
+
+@media (
+  max-width: 600px
+) {
+
+  .sorting-page
+  .sorting-header-left {
+    left: 20px !important;
+  }
+
+
+  .sorting-page
+  .sorting-header-right {
+    right: 20px !important;
+  }
+
+
+  .sorting-content-viewport {
+    padding:
+      18px
+      16px
+      12px;
+  }
+
+
+  .sorting-page
+  .sorting-version {
+    right: 16px !important;
+
+    bottom: 12px !important;
+
+    font-size: 10px !important;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL WINDOW
+========================================================= */
+
+@media (
+  max-height: 600px
+) {
+
+  .sorting-page
+  .sorting-header {
+    height: 58px !important;
+
+    min-height: 58px !important;
+
+    flex:
+      0 0 58px !important;
+  }
+
+
+  .sorting-content-viewport {
+    padding-top: 16px;
+
+    padding-bottom: 10px;
+  }
+
+
+  .sorting-empty {
+    height:
+      calc(
+        100dvh - 58px
+      );
+  }
+
+}
+
+
+/* =========================================================
+   LIGHT THEME
+   Match Home background
+========================================================= */
+
+html[data-theme="light"] .sorting-page,
+html:not([data-theme="dark"]) .sorting-page {
+  background:
+    #e5ebef !important;
+}
+
+
+/* =========================================================
+   SORTING HEADER
+
+   HEADER TETAP PUTIH
+========================================================= */
+
+html[data-theme="light"] .sorting-header,
+html:not([data-theme="dark"]) .sorting-header {
+  background:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   SORTING CONTENT
+========================================================= */
+
+html[data-theme="light"]
+.sorting-content-viewport,
+
+html:not([data-theme="dark"])
+.sorting-content-viewport {
+  background:
+    #e5ebef !important;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+html[data-theme="light"] .sorting-empty,
+html:not([data-theme="dark"]) .sorting-empty {
+  background:
+    #e5ebef !important;
+}
+
+
+/* =========================================================
+   PREVIEW CARD — LIGHT
+
+   Background wrapper dibuat putih supaya
+   preview yang juga putih tidak menghasilkan
+   garis/halo di rounded corner.
+========================================================= */
+
+html[data-theme="light"]
+.sorting-stage
+.sorting-preview,
+
+html:not([data-theme="dark"])
+.sorting-stage
+.sorting-preview {
+  background:
+    #ffffff !important;
+
+  border:
+    none !important;
+
+  outline:
+    none !important;
+}
+
+
+/* =========================================================
+   PREVIEW CARD — DARK
+
+   Ini bagian penting untuk menghilangkan
+   garis putih/abu di sekitar preview.
+
+   Wrapper sekarang mengikuti warna area
+   viewer dark, bukan warna light dari
+   sorting.css.
+========================================================= */
+
+html[data-theme="dark"]
+.sorting-stage
+.sorting-preview {
+  background:
+    #272727 !important;
+
+  border:
+    none !important;
+
+  outline:
+    none !important;
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+html[data-theme="light"]
+.sorting-progress-track,
+
+html:not([data-theme="dark"])
+.sorting-progress-track {
+  background:
+    #d1d1d1;
+}
+
+
+html[data-theme="light"]
+.sorting-progress-current,
+
+html[data-theme="light"]
+.sorting-progress-remaining,
+
+html:not([data-theme="dark"])
+.sorting-progress-current,
+
+html:not([data-theme="dark"])
+.sorting-progress-remaining {
+  color:
+    #111111;
+}
+
+
+/* =========================================================
+   FILE INFO
+========================================================= */
+
+html[data-theme="light"] .file-info,
+html:not([data-theme="dark"]) .file-info {
+  color:
+    #111111;
+}
+
+
+html[data-theme="light"] .file-info-name,
+html:not([data-theme="dark"]) .file-info-name {
+  color:
+    #111111;
+}
+
+
+html[data-theme="light"] .file-info-meta,
+html:not([data-theme="dark"]) .file-info-meta {
+  color:
+    #777777;
+}
+
+
+/* =========================================================
+   VERSION
+========================================================= */
+
+html[data-theme="light"] .sorting-version,
+html:not([data-theme="dark"]) .sorting-version {
+  color:
+    #777777;
+}
+
+
+/* =========================================================
+   DARK THEME — VERSION
+========================================================= */
+
+html[data-theme="dark"] .sorting-version {
+  color:
+    #777777;
+}
+
+
+/* =========================================================
+   DARK THEME — EMPTY STATE
+========================================================= */
+
+html[data-theme="dark"] .sorting-empty {
+  background:
+    #181818 !important;
+}
+
+
+/* =========================================================
+   DARK THEME — CONTENT VIEWPORT
+========================================================= */
+
+html[data-theme="dark"]
+.sorting-content-viewport {
+  background:
+    #181818 !important;
+}
+
+
+/* =========================================================
+   DARK THEME — PAGE
+========================================================= */
+
+html[data-theme="dark"] .sorting-page {
+  background:
+    #181818 !important;
+}

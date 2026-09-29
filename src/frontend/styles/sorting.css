@@ -1,0 +1,1505 @@
+/* =========================================================
+   ARCHIO - SORTING PAGE
+========================================================= */
+
+.sorting-page {
+  width: 100%;
+  height: 100vh;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  background: #f5f5f7;
+
+  color: #111111;
+
+  font-family:
+    "Urbanist",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.sorting-header {
+  position: relative;
+
+  width: 100%;
+
+  height: 72px;
+  min-height: 72px;
+
+  flex: 0 0 72px;
+
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #eeeeee;
+
+  z-index: 30;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+
+.sorting-header-left {
+  position: absolute;
+
+  left: 60px;
+  top: 0;
+
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+
+  z-index: 40;
+}
+
+
+.sorting-back-button {
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+
+  margin-right: 4px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #174f91;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  border-radius: 8px;
+}
+
+
+.sorting-back-button:hover {
+  background: #f1f5fa;
+}
+
+
+.sorting-back-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+.sorting-folder {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+}
+
+
+.sorting-folder-label {
+  font-size: 16px;
+
+  font-weight: 600;
+
+  color: #174f91;
+}
+
+
+.sorting-folder-name {
+  display: none;
+}
+
+
+.sorting-header-title {
+  width: min(
+    45%,
+    500px
+  );
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 23px;
+
+  font-weight: 700;
+
+  color: #111111;
+
+  text-align: center;
+}
+
+
+.sorting-header-right {
+  position: absolute;
+
+  right: 60px;
+  top: 0;
+
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 50;
+}
+
+
+/* =========================================================
+   THEME TOGGLE
+========================================================= */
+
+.theme-toggle {
+  width: 64px;
+  height: 34px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.theme-toggle-track {
+  width: 64px;
+  height: 34px;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+
+  border-radius: 999px;
+
+  background: #eeeeef;
+
+  transition:
+    background 0.2s ease;
+}
+
+
+.theme-toggle-track-dark {
+  background: #343434;
+}
+
+
+.theme-toggle-thumb {
+  width: 28px;
+  height: 28px;
+
+  position: absolute;
+
+  top: 3px;
+  left: 3px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 1px 4px
+    rgba(
+      0,
+      0,
+      0,
+      0.12
+    );
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+.theme-toggle-thumb-dark {
+  transform:
+    translateX(30px);
+}
+
+
+.theme-toggle-icon {
+  width: 24px;
+  height: 24px;
+
+  position: absolute;
+
+  top: 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+
+.theme-toggle-icon svg {
+  width: 16px;
+  height: 16px;
+
+  display: block;
+}
+
+
+.theme-toggle-sun {
+  left: 5px;
+
+  color: #111111;
+}
+
+
+.theme-toggle-moon {
+  right: 5px;
+
+  color: #999999;
+}
+
+
+.theme-toggle:hover
+.theme-toggle-track {
+  background: #e5e5e7;
+}
+
+
+.theme-toggle:hover
+.theme-toggle-track-dark {
+  background: #404040;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.sorting-content {
+  width: min(
+    calc(100% - 80px),
+    1005px
+  );
+
+  flex: 1;
+
+  min-width: 0;
+  min-height: 0;
+
+  margin: 0 auto;
+
+  padding-top: 30px;
+  padding-bottom: 20px;
+
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.sorting-progress {
+  width: 100%;
+
+  flex: 0 0 auto;
+
+  /*
+   * Lebih lega dari header.
+   */
+  margin-bottom: 28px;
+}
+
+
+.sorting-progress-header {
+  width: 100%;
+
+  margin-bottom: 7px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.sorting-progress-current,
+.sorting-progress-remaining {
+  font-size: 14px;
+
+  line-height: 1.2;
+
+  font-weight: 600;
+
+  color: #111111;
+}
+
+
+.sorting-progress-track {
+  width: 100%;
+  height: 5px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #d9d9db;
+}
+
+
+.sorting-progress-fill {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: #686868;
+
+  transition:
+    width 0.25s ease;
+}
+
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+.sorting-preview {
+  width: 100%;
+
+  /*
+   * Preview mengikuti rasio desain.
+   */
+  aspect-ratio: 1005 / 562;
+
+  height: auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  flex: 0 0 auto;
+
+  position: relative;
+
+  overflow: hidden;
+
+  border-radius: 22px;
+
+  background: #ffffff;
+
+  box-sizing: border-box;
+}
+
+
+.sorting-preview > * {
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+}
+
+
+/* =========================================================
+   FILE INFO
+========================================================= */
+
+.file-info {
+  width: 100%;
+
+  margin-top: 24px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+}
+
+
+.file-info-name {
+  width: 100%;
+
+  max-width: 92%;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 24px;
+
+  line-height: 1.25;
+
+  /*
+   * Semibold agar tetap kuat tapi tidak terlalu berat.
+   */
+  font-weight: 600;
+
+  color: #111111;
+}
+
+
+.file-info-details {
+  margin-top: 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  row-gap: 3px;
+
+  font-size: 14px;
+
+  line-height: 1.4;
+
+  /*
+   * Lebih terlihat daripada 400.
+   */
+  font-weight: 500;
+
+  color: #777777;
+}
+
+
+.file-info-item {
+  white-space: nowrap;
+}
+
+
+.file-info-separator {
+  margin: 0 6px;
+
+  color: #9a9a9a;
+}
+
+
+.file-info-metadata-group {
+  display: inline-flex;
+
+  align-items: center;
+}
+
+
+/* =========================================================
+   ACTION BAR
+========================================================= */
+
+.action-bar {
+  width: 100%;
+
+  margin-top: 24px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+
+.action-bar-buttons {
+  width: 775px;
+
+  max-width: 100%;
+
+  min-height: 82px;
+
+  padding: 12px 28px;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 38px;
+
+  background: #ffffff;
+
+  border: 1px solid #ededed;
+
+  border-radius: 42px;
+
+  box-shadow:
+    0 5px 18px
+    rgba(
+      0,
+      0,
+      0,
+      0.06
+    );
+}
+
+
+.action-button {
+  height: 56px;
+
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 0 24px;
+
+  border: none;
+
+  border-radius: 32px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  font-family: inherit;
+
+  font-size: 19px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+
+.action-button:hover {
+  filter: brightness(0.98);
+
+  transform:
+    translateY(-1px);
+}
+
+
+.action-button:active {
+  transform:
+    translateY(0);
+}
+
+
+.action-button-icon {
+  width: 22px;
+  height: 22px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 22px;
+}
+
+
+.action-button-icon svg {
+  width: 20px;
+  height: 20px;
+
+  display: block;
+}
+
+
+.action-button-label {
+  white-space: nowrap;
+}
+
+
+.action-button-shortcut {
+  min-width: 28px;
+  height: 28px;
+
+  padding: 0 7px;
+
+  box-sizing: border-box;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+
+/* DELETE */
+
+.action-button-delete {
+  color: #d84843;
+
+  background: #fde9e7;
+}
+
+
+.action-button-delete
+.action-button-shortcut {
+  color: #db8e89;
+
+  background: #f8deda;
+}
+
+
+/* MOVE */
+
+.action-button-move {
+  color: #111111;
+
+  background: #eeeeef;
+}
+
+
+.action-button-move
+.action-button-shortcut {
+  color: #999999;
+
+  background: #e1e1e2;
+}
+
+
+/* SAVE */
+
+.action-button-save {
+  color: #ffffff;
+
+  background: #55b64d;
+}
+
+
+.action-button-save
+.action-button-shortcut {
+  color: #b6dfb3;
+
+  background: #73c66c;
+}
+
+
+/* =========================================================
+   VERSION
+========================================================= */
+
+.sorting-version {
+  position: fixed;
+
+  right: 24px;
+  bottom: 18px;
+
+  font-size: 11px;
+
+  line-height: 1;
+
+  color: #666666;
+
+  pointer-events: none;
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   IMAGE PREVIEW
+========================================================= */
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+  overflow: hidden;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border-radius: inherit;
+}
+
+
+.image-preview-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  display: block;
+}
+
+
+.image-preview-image-dragging {
+  cursor: grabbing;
+}
+
+
+/* =========================================================
+   IMAGE FULLSCREEN
+========================================================= */
+
+.image-fullscreen-button {
+  position: absolute;
+
+  top: 16px;
+  right: 16px;
+
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 9px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(
+      65,
+      65,
+      65,
+      0.72
+    );
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  z-index: 20;
+
+  backdrop-filter:
+    blur(8px);
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+
+.image-fullscreen-button:hover {
+  background:
+    rgba(
+      45,
+      45,
+      45,
+      0.86
+    );
+
+  transform:
+    scale(1.04);
+}
+
+
+.image-fullscreen-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* =========================================================
+   IMAGE CONTROLS
+========================================================= */
+
+.image-preview-controls {
+  position: absolute;
+
+  left: 50%;
+  bottom: 22px;
+
+  transform:
+    translateX(-50%);
+
+  height: 44px;
+
+  padding: 0 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  border-radius: 22px;
+
+  background:
+    rgba(
+      55,
+      55,
+      55,
+      0.88
+    );
+
+  color: #ffffff;
+
+  z-index: 15;
+
+  backdrop-filter:
+    blur(8px);
+}
+
+
+.image-preview-control-button,
+.image-preview-fit-button {
+  border: none;
+
+  padding: 0;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  cursor: pointer;
+}
+
+
+.image-preview-control-button {
+  width: 24px;
+  height: 28px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+
+  line-height: 1;
+}
+
+
+.image-preview-control-button:disabled {
+  opacity: 0.4;
+
+  cursor: default;
+}
+
+
+.image-preview-zoom {
+  min-width: 38px;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  font-weight: 500;
+}
+
+
+.image-preview-control-divider {
+  width: 1px;
+  height: 24px;
+
+  margin: 0 2px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.3
+    );
+}
+
+
+.image-preview-fit-button {
+  padding: 0 4px;
+
+  font-size: 13px;
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   VIDEO PREVIEW
+========================================================= */
+
+.video-preview-container {
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+  overflow: hidden;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #202020;
+
+  border-radius: inherit;
+}
+
+
+.video-preview {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  display: block;
+}
+
+
+.video-fullscreen-button {
+  position: absolute;
+
+  top: 16px;
+  right: 16px;
+
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 9px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(
+      65,
+      65,
+      65,
+      0.72
+    );
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  z-index: 20;
+
+  backdrop-filter:
+    blur(8px);
+}
+
+
+.video-fullscreen-button:hover {
+  background:
+    rgba(
+      45,
+      45,
+      45,
+      0.86
+    );
+}
+
+
+.video-fullscreen-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+.image-preview:fullscreen,
+.video-preview-container:fullscreen {
+  width: 100vw;
+  height: 100vh;
+
+  border-radius: 0;
+
+  background: #000000;
+}
+
+
+.image-preview:fullscreen
+.image-preview-image {
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+
+.video-preview-container:fullscreen
+.video-preview {
+  width: 100vw;
+  height: 100vh;
+}
+
+
+/* =========================================================
+   RESPONSIVE - 1100
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .sorting-content {
+    width: min(
+      calc(100% - 48px),
+      1005px
+    );
+  }
+
+
+  .sorting-preview {
+    width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1005 / 562;
+
+    flex: 0 0 auto;
+  }
+
+
+  .action-bar-buttons {
+    width: min(
+      775px,
+      100%
+    );
+
+    gap: 28px;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE - 900
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .sorting-header-left {
+    left: 32px;
+  }
+
+
+  .sorting-header-right {
+    right: 32px;
+  }
+
+
+  .sorting-content {
+    width: calc(100% - 40px);
+
+    max-width: 1005px;
+  }
+
+
+  .sorting-preview {
+    width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1005 / 562;
+
+    flex: 0 0 auto;
+
+    border-radius: 20px;
+  }
+
+
+  .action-bar-buttons {
+    width: min(
+      775px,
+      100%
+    );
+
+    gap: 20px;
+  }
+
+
+  .action-button {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE - 760
+========================================================= */
+
+@media (max-width: 760px) {
+
+  .sorting-header {
+    height: 60px;
+
+    min-height: 60px;
+
+    flex-basis: 60px;
+  }
+
+
+  .sorting-header-left {
+    left: 18px;
+
+    height: 60px;
+  }
+
+
+  .sorting-header-right {
+    right: 18px;
+
+    height: 60px;
+  }
+
+
+  .sorting-header-title {
+    width: 42%;
+
+    font-size: 19px;
+  }
+
+
+  .sorting-content {
+    width: calc(100% - 28px);
+
+    padding-top: 22px;
+    padding-bottom: 20px;
+  }
+
+
+  .sorting-progress {
+    margin-bottom: 20px;
+  }
+
+
+  .sorting-progress-current,
+  .sorting-progress-remaining {
+    font-size: 13px;
+  }
+
+
+  .sorting-preview {
+    width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1005 / 562;
+
+    flex: 0 0 auto;
+
+    border-radius: 18px;
+  }
+
+
+  .file-info {
+    margin-top: 18px;
+  }
+
+
+  .file-info-name {
+    max-width: 96%;
+
+    font-size: 20px;
+  }
+
+
+  .file-info-details {
+    font-size: 13px;
+  }
+
+
+  .action-bar {
+    margin-top: 18px;
+  }
+
+
+  .action-bar-buttons {
+    width: 100%;
+
+    min-height: 68px;
+
+    padding: 8px 10px;
+
+    gap: 8px;
+
+    border-radius: 36px;
+  }
+
+
+  .action-button {
+    height: 50px;
+
+    padding: 0 8px;
+
+    gap: 5px;
+
+    font-size: 15px;
+  }
+
+
+  .action-button-icon {
+    width: 18px;
+    height: 18px;
+
+    flex-basis: 18px;
+  }
+
+
+  .action-button-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+
+  .action-button-shortcut {
+    min-width: 23px;
+
+    height: 23px;
+
+    padding: 0 5px;
+
+    font-size: 11px;
+  }
+
+
+  .sorting-version {
+    right: 16px;
+
+    bottom: 12px;
+
+    font-size: 10px;
+  }
+}
+
+
+/* =========================================================
+   SHORT WINDOW
+========================================================= */
+
+@media (max-height: 760px) {
+
+  .sorting-content {
+    padding-top: 22px;
+  }
+
+
+  .sorting-progress {
+    margin-bottom: 20px;
+  }
+
+
+  .file-info {
+    margin-top: 18px;
+  }
+
+
+  .action-bar {
+    margin-top: 18px;
+  }
+}
+
+
+/* =========================================================
+   VERY SHORT WINDOW
+========================================================= */
+
+@media (max-height: 650px) {
+
+  .sorting-content {
+    padding-top: 16px;
+    padding-bottom: 14px;
+  }
+
+
+  .sorting-progress {
+    margin-bottom: 16px;
+  }
+
+
+  .file-info {
+    margin-top: 14px;
+  }
+
+
+  .action-bar {
+    margin-top: 14px;
+  }
+}
+
+
+/* =========================================================
+   DARK THEME
+========================================================= */
+
+html[data-theme="dark"] .sorting-page {
+  background: #171717;
+
+  color: #f2f2f2;
+}
+
+
+html[data-theme="dark"] .sorting-header {
+  background: #202020;
+
+  border-bottom-color: #303030;
+}
+
+
+html[data-theme="dark"] .sorting-header-title {
+  color: #f5f5f5;
+}
+
+
+html[data-theme="dark"] .sorting-back-button {
+  color: #6f91ff;
+}
+
+
+html[data-theme="dark"]
+.sorting-back-button:hover {
+  background: #292929;
+}
+
+
+html[data-theme="dark"]
+.sorting-progress-current,
+
+html[data-theme="dark"]
+.sorting-progress-remaining {
+  color: #f0f0f0;
+}
+
+
+html[data-theme="dark"]
+.sorting-progress-track {
+  background: #3b3b3b;
+}
+
+
+html[data-theme="dark"]
+.sorting-progress-fill {
+  background: #858585;
+}
+
+
+html[data-theme="dark"]
+.file-info-name {
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"]
+.file-info-details {
+  color: #aaaaaa;
+}
+
+
+html[data-theme="dark"]
+.file-info-separator {
+  color: #777777;
+}
+
+
+html[data-theme="dark"]
+.action-bar-buttons {
+  background: #252525;
+
+  border-color: #333333;
+
+  box-shadow:
+    0 5px 18px
+    rgba(
+      0,
+      0,
+      0,
+      0.2
+    );
+}
+
+
+html[data-theme="dark"]
+.action-button-move {
+  color: #f0f0f0;
+
+  background: #363636;
+}
+
+
+html[data-theme="dark"]
+.action-button-move
+.action-button-shortcut {
+  color: #aaaaaa;
+
+  background: #444444;
+}
+
+
+html[data-theme="dark"]
+.sorting-version {
+  color: #777777;
+}
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+:fullscreen {
+  background: #292929;
+}

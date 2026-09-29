@@ -1,0 +1,872 @@
+/* =========================================================
+   ARCHIO
+   SORTING RESPONSIVE LAYOUT
+========================================================= */
+
+
+/* =========================================================
+   BASE
+========================================================= */
+
+.sorting-page {
+  width: 100%;
+  min-width: 0;
+
+  min-height: 100dvh;
+
+  height: auto;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  box-sizing: border-box;
+}
+
+
+/*
+ * Content tidak boleh memaksa viewport
+ * menjadi lebih lebar.
+ */
+
+.sorting-content {
+  width: min(
+    calc(100% - 80px),
+    1005px
+  );
+
+  max-width: 1005px;
+
+  min-width: 0;
+
+  flex: 0 0 auto;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+/*
+ * INI BAGIAN PALING PENTING.
+ *
+ * Preview selalu mengikuti WIDTH container.
+ *
+ * Desktop:
+ * 1005 × 562
+ *
+ * Window mengecil:
+ * 900 → preview ikut mengecil
+ * 800 → preview ikut mengecil
+ * 700 → preview ikut mengecil
+ *
+ * Aspect ratio tetap.
+ */
+
+.sorting-preview {
+  width: 100%;
+
+  max-width: 100%;
+
+  height: auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  aspect-ratio: 1005 / 562;
+
+  flex: 0 0 auto;
+
+  box-sizing: border-box;
+}
+
+
+/*
+ * Semua preview di dalam sorting
+ * harus mengikuti ukuran parent.
+ */
+
+.sorting-preview > * {
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+}
+
+
+/* =========================================================
+   GENERAL
+========================================================= */
+
+.file-info {
+  width: 100%;
+
+  max-width: 100%;
+
+  min-width: 0;
+
+  box-sizing: border-box;
+}
+
+.file-info-name {
+  max-width: 96%;
+}
+
+
+/* =========================================================
+   ACTION BAR
+========================================================= */
+
+.action-bar {
+  width: 100%;
+
+  max-width: 100%;
+
+  min-width: 0;
+
+  box-sizing: border-box;
+}
+
+.action-bar-buttons {
+  width: min(
+    775px,
+    100%
+  );
+
+  max-width: 100%;
+
+  min-width: 0;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .sorting-content {
+    width: calc(100% - 48px);
+
+    max-width: 1005px;
+
+    min-width: 0;
+  }
+
+
+  .sorting-preview {
+    width: 100%;
+
+    max-width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1005 / 562;
+  }
+
+
+  .action-bar-buttons {
+    width: min(
+      775px,
+      100%
+    );
+  }
+
+}
+
+
+/* =========================================================
+   SMALL WINDOW
+========================================================= */
+
+@media (max-width: 760px) {
+
+  /*
+   * HEADER
+   */
+
+  .sorting-header {
+    height: 58px;
+
+    flex: 0 0 58px;
+
+    padding: 0 20px;
+  }
+
+
+  .sorting-header-left {
+    left: 20px;
+
+    height: 58px;
+
+    max-width: 38%;
+
+    min-width: 0;
+  }
+
+
+  .sorting-header-right {
+    right: 20px;
+
+    height: 58px;
+  }
+
+
+  .sorting-header-title {
+    max-width: 38%;
+
+    font-size: 18px;
+  }
+
+
+  .sorting-folder {
+    min-width: 0;
+  }
+
+
+  .sorting-folder-label {
+    font-size: 14px;
+  }
+
+
+  /*
+   * THEME TOGGLE
+   */
+
+  .theme-toggle {
+    width: 56px;
+    height: 30px;
+  }
+
+
+  .theme-toggle-track {
+    width: 56px;
+    height: 30px;
+  }
+
+
+  .theme-toggle-thumb {
+    width: 24px;
+    height: 24px;
+
+    top: 3px;
+    left: 3px;
+  }
+
+
+  .theme-toggle-thumb-dark {
+    transform:
+      translateX(26px);
+  }
+
+
+  .theme-toggle-icon {
+    width: 20px;
+    height: 20px;
+
+    top: 5px;
+  }
+
+
+  .theme-toggle-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+
+  /*
+   * CONTENT
+   */
+
+  .sorting-content {
+    width: calc(100% - 28px);
+
+    max-width: 1005px;
+
+    min-width: 0;
+
+    padding-top: 18px;
+    padding-bottom: 28px;
+
+    box-sizing: border-box;
+  }
+
+
+  /*
+   * PROGRESS
+   */
+
+  .sorting-progress {
+    width: 100%;
+
+    margin-bottom: 16px;
+  }
+
+
+  .sorting-progress-current,
+  .sorting-progress-remaining {
+    font-size: 13px;
+  }
+
+
+  /*
+   * PREVIEW
+   */
+
+  .sorting-preview {
+    width: 100%;
+
+    max-width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1005 / 562;
+
+    min-width: 0;
+    min-height: 0;
+
+    border-radius: 18px;
+  }
+
+
+  /*
+   * FILE INFO
+   */
+
+  .file-info {
+    width: 100%;
+
+    margin-top: 18px;
+  }
+
+
+  .file-info-name {
+    width: 100%;
+
+    max-width: 96%;
+
+    font-size: 20px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+
+  .file-info-details {
+    max-width: 100%;
+
+    font-size: 13px;
+
+    flex-wrap: wrap;
+  }
+
+
+  /*
+   * ACTION BAR
+   */
+
+  .action-bar {
+    width: 100%;
+
+    margin-top: 18px;
+  }
+
+
+  .action-bar-buttons {
+    width: 100%;
+
+    min-height: 68px;
+
+    padding: 8px 10px;
+
+    gap: 10px;
+
+    box-sizing: border-box;
+  }
+
+
+  .action-button {
+    min-width: 0;
+
+    height: 50px;
+
+    padding: 0 10px;
+
+    gap: 6px;
+
+    font-size: 15px;
+
+    white-space: nowrap;
+  }
+
+
+  .action-button-icon {
+    width: 18px;
+    height: 18px;
+
+    flex: 0 0 18px;
+  }
+
+
+  .action-button-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+
+  .action-button-shortcut {
+    min-width: 23px;
+
+    height: 23px;
+
+    padding: 0 5px;
+
+    font-size: 11px;
+  }
+
+
+  /*
+   * VERSION
+   *
+   * Jangan fixed pada window kecil.
+   * Supaya tidak menabrak action bar.
+   */
+
+  .sorting-version {
+    position: static;
+
+    display: block;
+
+    width: 100%;
+
+    padding:
+      0
+      16px
+      14px;
+
+    box-sizing: border-box;
+
+    text-align: right;
+
+    font-size: 10px;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL WIDTH
+========================================================= */
+
+@media (max-width: 520px) {
+
+  /*
+   * HEADER
+   */
+
+  .sorting-header {
+    padding: 0 14px;
+  }
+
+
+  .sorting-header-left {
+    left: 14px;
+
+    max-width: 32%;
+  }
+
+
+  .sorting-header-right {
+    right: 14px;
+  }
+
+
+  .sorting-header-title {
+    max-width: 32%;
+
+    font-size: 16px;
+  }
+
+
+  .sorting-folder {
+    gap: 3px;
+  }
+
+
+  .sorting-folder-label {
+    font-size: 13px;
+  }
+
+
+  .sorting-back-button {
+    width: 28px;
+    height: 28px;
+
+    margin-right: 1px;
+  }
+
+
+  .sorting-back-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+
+  /*
+   * CONTENT
+   */
+
+  .sorting-content {
+    width: calc(100% - 20px);
+
+    padding-top: 14px;
+    padding-bottom: 24px;
+  }
+
+
+  /*
+   * PROGRESS
+   */
+
+  .sorting-progress {
+    margin-bottom: 12px;
+  }
+
+
+  .sorting-progress-current,
+  .sorting-progress-remaining {
+    font-size: 12px;
+  }
+
+
+  /*
+   * PREVIEW
+   */
+
+  .sorting-preview {
+    width: 100%;
+
+    max-width: 100%;
+
+    aspect-ratio: 1005 / 562;
+
+    border-radius: 16px;
+  }
+
+
+  /*
+   * FILE INFO
+   */
+
+  .file-info {
+    margin-top: 14px;
+  }
+
+
+  .file-info-name {
+    max-width: 98%;
+
+    font-size: 17px;
+  }
+
+
+  .file-info-details {
+    font-size: 12px;
+  }
+
+
+  /*
+   * ACTION BAR
+   *
+   * TETAP HORIZONTAL.
+   * Tidak dibuat 3 baris.
+   */
+
+  .action-bar {
+    margin-top: 14px;
+  }
+
+
+  .action-bar-buttons {
+    width: 100%;
+
+    min-height: 58px;
+
+    padding: 6px;
+
+    gap: 6px;
+
+    border-radius: 30px;
+  }
+
+
+  .action-button {
+    min-width: 0;
+
+    height: 44px;
+
+    padding: 0 6px;
+
+    gap: 4px;
+
+    font-size: 12px;
+  }
+
+
+  .action-button-icon {
+    width: 16px;
+    height: 16px;
+
+    flex: 0 0 16px;
+  }
+
+
+  .action-button-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+
+  .action-button-shortcut {
+    min-width: 20px;
+
+    height: 20px;
+
+    padding: 0 4px;
+
+    font-size: 9px;
+
+    border-radius: 5px;
+  }
+
+}
+
+
+/* =========================================================
+   WINDOW PENDEK
+========================================================= */
+
+/*
+ * PENTING:
+ *
+ * Kita TIDAK lagi menggunakan:
+ *
+ * calc((100vh - 300px) * ratio)
+ *
+ * karena itu yang membuat preview tiba-tiba
+ * mempunyai ukuran aneh ketika window diperkecil.
+ *
+ * Kalau tinggi window tidak cukup:
+ *
+ * -> halaman SCROLL
+ *
+ * bukan:
+ *
+ * -> preview dipaksa mengecil berdasarkan tinggi.
+ */
+
+@media (max-height: 700px) {
+
+  .sorting-page {
+    height: auto;
+
+    min-height: 100dvh;
+
+    overflow-x: hidden;
+
+    overflow-y: auto;
+  }
+
+
+  .sorting-content {
+    flex: 0 0 auto;
+
+    padding-top: 16px;
+
+    padding-bottom: 24px;
+  }
+
+
+  .sorting-preview {
+    width: 100%;
+
+    max-width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1005 / 562;
+
+    flex: 0 0 auto;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SHORT + NARROW
+========================================================= */
+
+@media
+(max-width: 760px)
+and
+(max-height: 650px) {
+
+  .sorting-page {
+    height: auto;
+
+    min-height: 100dvh;
+
+    overflow-x: hidden;
+
+    overflow-y: auto;
+  }
+
+
+  .sorting-content {
+    padding-top: 12px;
+
+    padding-bottom: 24px;
+  }
+
+
+  .sorting-progress {
+    margin-bottom: 12px;
+  }
+
+
+  .sorting-preview {
+    width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1005 / 562;
+  }
+
+
+  .file-info {
+    margin-top: 12px;
+  }
+
+
+  .file-info-name {
+    font-size: 17px;
+  }
+
+
+  .action-bar {
+    margin-top: 12px;
+  }
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+html[data-theme="dark"] .sorting-page {
+  background: #181818;
+
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"] .sorting-header {
+  background: #202020;
+
+  border-bottom-color: #303030;
+}
+
+
+html[data-theme="dark"] .sorting-header-title {
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"] .sorting-progress-current,
+html[data-theme="dark"] .sorting-progress-remaining {
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"] .sorting-back-button {
+  color: #8db4ff;
+}
+
+
+html[data-theme="dark"]
+.sorting-back-button:hover {
+  background: #2a2a2a;
+}
+
+
+html[data-theme="dark"]
+.sorting-progress-track {
+  background: #3a3a3a;
+}
+
+
+html[data-theme="dark"]
+.sorting-progress-fill {
+  background: #8a8a8a;
+}
+
+
+html[data-theme="dark"]
+.file-info-name {
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"]
+.file-info-details {
+  color: #999999;
+}
+
+
+html[data-theme="dark"]
+.file-info-separator {
+  color: #777777;
+}
+
+
+html[data-theme="dark"]
+.action-bar-buttons {
+  background: #242424;
+
+  border-color: #333333;
+
+  box-shadow:
+    0 5px 18px
+    rgba(0, 0, 0, 0.2);
+}
+
+
+html[data-theme="dark"]
+.action-button-move {
+  background: #353535;
+
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"]
+.action-button-move
+.action-button-shortcut {
+  background: #444444;
+
+  color: #bdbdbd;
+}
+
+
+html[data-theme="dark"]
+.sorting-version {
+  color: #999999;
+}

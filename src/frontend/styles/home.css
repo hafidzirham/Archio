@@ -1,0 +1,673 @@
+@font-face {
+  font-family: "Urbanist";
+
+  src:
+    url("/assets/fonts/Urbanist-Regular.ttf")
+    format("truetype");
+
+  font-weight: 400;
+
+  font-style: normal;
+
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: "Urbanist";
+
+  src:
+    url("/assets/fonts/Urbanist-Medium.ttf")
+    format("truetype");
+
+  font-weight: 500;
+
+  font-style: normal;
+
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: "Urbanist";
+
+  src:
+    url("/assets/fonts/Urbanist-SemiBold.ttf")
+    format("truetype");
+
+  font-weight: 600;
+
+  font-style: normal;
+
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: "Urbanist";
+
+  src:
+    url("/assets/fonts/Urbanist-Bold.ttf")
+    format("truetype");
+
+  font-weight: 700;
+
+  font-style: normal;
+
+  font-display: swap;
+}
+
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+
+html,
+body,
+#root {
+  width: 100%;
+
+  min-width: 0;
+
+  min-height: 100%;
+
+  margin: 0;
+}
+
+
+body {
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HOME
+========================================================= */
+
+.home {
+  width: 100%;
+
+  min-width: 0;
+
+  min-height: 100dvh;
+
+  padding:
+    48px
+    32px;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  position: relative;
+
+  overflow: hidden;
+
+  background: #e5ebef;
+
+  color: #050505;
+
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.home-content {
+  width: min(
+    100%,
+    520px
+  );
+
+  max-width: 100%;
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ILLUSTRATION
+========================================================= */
+
+.home-illustration {
+  display: block;
+
+  width: min(
+    100%,
+    430px
+  );
+
+  max-width: 100%;
+
+  height: auto;
+
+  object-fit: contain;
+
+  margin-bottom: 24px;
+
+  flex: 0 1 auto;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.home-title {
+  margin: 0;
+
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  font-size:
+    clamp(
+      42px,
+      5vw,
+      56px
+    );
+
+  font-weight: 700;
+
+  line-height: 1.05;
+
+  color: #050505;
+}
+
+
+/* =========================================================
+   SUBTITLE
+========================================================= */
+
+.home-subtitle {
+  width: 100%;
+
+  max-width: 100%;
+
+  margin:
+    12px
+    0
+    24px;
+
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  font-size:
+    clamp(
+      16px,
+      2vw,
+      20px
+    );
+
+  font-weight: 400;
+
+  line-height: 1.4;
+
+  color: #111111;
+}
+
+
+/* =========================================================
+   SELECT FOLDER
+========================================================= */
+
+.select-folder-button {
+  width: min(
+    100%,
+    400px
+  );
+
+  max-width: 100%;
+
+  min-height: 48px;
+
+  padding:
+    12px
+    24px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  background: #4c73e6;
+
+  color: #ffffff;
+
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  font-size: 17px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+
+  box-sizing: border-box;
+}
+
+
+.select-folder-button:hover {
+  background: #4268d8;
+}
+
+
+.select-folder-button:active {
+  transform:
+    translateY(1px);
+}
+
+
+.select-folder-button:disabled {
+  opacity: 0.65;
+
+  cursor: default;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.home-error {
+  width: min(
+    100%,
+    400px
+  );
+
+  max-width: 100%;
+
+  margin-top: 14px;
+
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  font-size: 13px;
+
+  font-weight: 400;
+
+  line-height: 1.45;
+
+  color: #c0392b;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   VERSION
+========================================================= */
+
+.app-version {
+  position: fixed;
+
+  right: 24px;
+
+  bottom: 16px;
+
+  margin: 0;
+
+  padding: 0;
+
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  font-size: 12px;
+
+  font-weight: 400;
+
+  line-height: 1;
+
+  color: #777777;
+
+  white-space: nowrap;
+
+  user-select: none;
+
+  pointer-events: none;
+
+  z-index: 1000;
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+html[data-theme="dark"] .home {
+  background: #181818;
+
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"] .home-title {
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"] .home-subtitle {
+  color: #d8d8d8;
+}
+
+
+html[data-theme="dark"] .app-version {
+  color: #999999;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .home {
+    padding:
+      40px
+      24px;
+  }
+
+
+  .home-illustration {
+    width: min(
+      100%,
+      360px
+    );
+
+    margin-bottom: 20px;
+  }
+
+
+  .home-subtitle {
+    margin-top: 10px;
+
+    margin-bottom: 22px;
+  }
+
+
+  .select-folder-button {
+    width: min(
+      100%,
+      360px
+    );
+  }
+
+
+  .app-version {
+    right: 20px;
+
+    bottom: 14px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .home {
+    min-height: 100dvh;
+
+    padding:
+      32px
+      20px;
+  }
+
+
+  .home-content {
+    width: 100%;
+
+    max-width: 100%;
+  }
+
+
+  .home-illustration {
+    width: min(
+      100%,
+      300px
+    );
+
+    margin-bottom: 18px;
+  }
+
+
+  .home-title {
+    font-size: 42px;
+  }
+
+
+  .home-subtitle {
+    font-size: 16px;
+
+    margin-top: 10px;
+
+    margin-bottom: 20px;
+  }
+
+
+  .select-folder-button {
+    width: 100%;
+
+    min-height: 46px;
+
+    font-size: 16px;
+  }
+
+
+  .app-version {
+    right: 16px;
+
+    bottom: 14px;
+
+    font-size: 11px;
+  }
+
+}
+
+
+/* =========================================================
+   WINDOW PENDEK
+========================================================= */
+
+@media (max-height: 700px) {
+
+  .home {
+    justify-content: center;
+
+    min-height: 100dvh;
+
+    overflow: hidden;
+
+    padding:
+      28px
+      32px;
+  }
+
+
+  .home-illustration {
+    width: min(
+      100%,
+      300px
+    );
+
+    margin-bottom: 16px;
+  }
+
+
+  .home-title {
+    font-size: 40px;
+  }
+
+
+  .home-subtitle {
+    margin-top: 8px;
+
+    margin-bottom: 18px;
+  }
+
+
+  .app-version {
+    position: fixed;
+
+    right: 20px;
+
+    bottom: 12px;
+
+    margin: 0;
+
+    font-size: 11px;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SHORT WINDOW
+========================================================= */
+
+@media (max-height: 560px) {
+
+  .home {
+    padding:
+      20px
+      24px;
+  }
+
+
+  .home-illustration {
+    width: min(
+      100%,
+      220px
+    );
+
+    margin-bottom: 12px;
+  }
+
+
+  .home-title {
+    font-size: 36px;
+  }
+
+
+  .home-subtitle {
+    font-size: 15px;
+
+    margin-top: 7px;
+
+    margin-bottom: 14px;
+  }
+
+
+  .select-folder-button {
+    min-height: 44px;
+
+    padding:
+      10px
+      20px;
+
+    font-size: 15px;
+  }
+
+
+  .app-version {
+    position: fixed;
+
+    right: 16px;
+
+    bottom: 10px;
+
+    margin: 0;
+
+    font-size: 10px;
+  }
+
+}
+
+/* =========================================================
+   HOME THEME TOGGLE
+========================================================= */
+
+.home-theme-toggle {
+  position: fixed;
+
+  top: 16px;
+  right: 24px;
+
+  z-index: 1000;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .home-theme-toggle {
+    top: 14px;
+    right: 20px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .home-theme-toggle {
+    top: 12px;
+    right: 16px;
+  }
+
+}

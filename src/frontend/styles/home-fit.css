@@ -1,0 +1,213 @@
+/* =========================================================
+   ARCHIO
+   HOME - SCALED APPLICATION CANVAS
+========================================================= */
+
+
+/* =========================================================
+   APPLICATION VIEWPORT
+========================================================= */
+
+.home {
+  width: 100vw !important;
+
+  height: 100dvh !important;
+
+  min-width: 0 !important;
+
+  min-height: 0 !important;
+
+  margin: 0;
+
+  padding: 0 !important;
+
+  overflow: hidden !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  position: relative;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   SCALE SHELL
+========================================================= */
+
+.home-stage-shell {
+  position: relative;
+
+  flex: 0 0 auto;
+
+  overflow: visible;
+}
+
+
+/* =========================================================
+   HOME CANVAS
+========================================================= */
+
+.home-stage {
+  width: 520px;
+
+  min-width: 520px;
+
+  min-height: 620px;
+
+  position: relative;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transform-origin:
+    top left;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.home-stage
+.home-content {
+  width: 520px;
+
+  max-width: 520px;
+
+  min-width: 520px;
+}
+
+
+/* =========================================================
+   ILLUSTRATION
+========================================================= */
+
+.home-stage
+.home-illustration {
+  width: 430px;
+
+  max-width: 430px;
+
+  margin-bottom: 24px;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.home-stage
+.home-title {
+  font-size: 56px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SUBTITLE
+========================================================= */
+
+.home-stage
+.home-subtitle {
+  width: 520px;
+
+  max-width: 520px;
+
+  font-size: 20px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.home-stage
+.select-folder-button {
+  width: 400px;
+
+  min-width: 400px;
+
+  max-width: 400px;
+
+  min-height: 48px;
+
+  font-size: 17px;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.home-stage
+.home-error {
+  width: 400px;
+
+  max-width: 400px;
+}
+
+
+/* =========================================================
+   VERSION
+========================================================= */
+
+.home-stage
+.app-version {
+  position: absolute;
+
+  right: 0;
+
+  bottom: 20px;
+
+  margin: 0;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+html[data-theme="dark"]
+.home {
+  background: #181818 !important;
+}
+
+
+html[data-theme="dark"]
+.home-stage
+.home-title {
+  color: #f3f3f3;
+}
+
+
+html[data-theme="dark"]
+.home-stage
+.home-subtitle {
+  color: #d8d8d8;
+}
+
+
+html[data-theme="dark"]
+.home-stage
+.app-version {
+  color: #999999;
+}

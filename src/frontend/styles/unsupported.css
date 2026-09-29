@@ -1,0 +1,319 @@
+/* =========================================================
+   ARCHIO UNSUPPORTED PREVIEW
+========================================================= */
+
+.unsupported-preview {
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border-radius: 22px;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.unsupported-preview-card {
+  width: min(100%, 420px);
+
+  padding: 24px;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+.unsupported-preview-icon {
+  width: 64px !important;
+  height: 64px !important;
+
+  min-width: 64px !important;
+  min-height: 64px !important;
+
+  max-width: 64px !important;
+  max-height: 64px !important;
+
+  margin-bottom: 16px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #9a9a9a;
+
+  transition:
+    color 0.2s ease;
+}
+
+
+.unsupported-preview-icon svg {
+  width: 56px !important;
+  height: 56px !important;
+
+  display: block !important;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.unsupported-preview-content {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+}
+
+
+.unsupported-preview-content h3 {
+  margin: 0;
+
+  font-size: 20px;
+
+  line-height: 1.3;
+
+  font-weight: 700;
+
+  color: #111111;
+
+  transition:
+    color 0.2s ease;
+}
+
+
+.unsupported-preview-content p {
+  margin: 7px 0 18px;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  color: #999999;
+
+  transition:
+    color 0.2s ease;
+}
+
+
+/* =========================================================
+   OPEN WITH BUTTON
+========================================================= */
+
+.unsupported-open-button {
+  height: 44px;
+
+  padding: 0 20px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  background: #2f80ed;
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 3px 8px
+    rgba(
+      47,
+      128,
+      237,
+      0.18
+    );
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+.unsupported-open-button:hover {
+  background: #2674dc;
+
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 5px 12px
+    rgba(
+      47,
+      128,
+      237,
+      0.24
+    );
+}
+
+
+.unsupported-open-button:active {
+  transform:
+    translateY(0);
+}
+
+
+.unsupported-open-button:disabled {
+  opacity: 0.65;
+
+  cursor: default;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   BUTTON ICON
+========================================================= */
+
+.unsupported-open-button-icon {
+  width: 18px;
+  height: 18px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+
+.unsupported-open-button-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.unsupported-open-error {
+  max-width: 320px;
+
+  margin-top: 10px;
+
+  font-size: 12px;
+
+  line-height: 1.4;
+
+  text-align: center;
+
+  color: #d84843;
+}
+
+
+/* =========================================================
+   DARK THEME
+========================================================= */
+
+html[data-theme="dark"] .unsupported-preview {
+
+  background: #292929;
+
+}
+
+
+html[data-theme="dark"] .unsupported-preview-content h3 {
+
+  color: #f3f3f3;
+
+}
+
+
+html[data-theme="dark"] .unsupported-preview-content p {
+
+  color: #a7a7a7;
+
+}
+
+
+html[data-theme="dark"] .unsupported-preview-icon {
+
+  color: #8e8e8e;
+
+}
+
+
+/* =========================================================
+   LIGHT THEME
+========================================================= */
+
+html[data-theme="light"] .unsupported-preview,
+html:not([data-theme="dark"]) .unsupported-preview {
+
+  background: #ffffff;
+
+}
+
+
+html[data-theme="light"] .unsupported-preview-content h3,
+html:not([data-theme="dark"]) .unsupported-preview-content h3 {
+
+  color: #111111;
+
+}
+
+
+html[data-theme="light"] .unsupported-preview-content p,
+html:not([data-theme="dark"]) .unsupported-preview-content p {
+
+  color: #999999;
+
+}
+
+
+html[data-theme="light"] .unsupported-preview-icon,
+html:not([data-theme="dark"]) .unsupported-preview-icon {
+
+  color: #9a9a9a;
+
+}

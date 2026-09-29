@@ -1,0 +1,614 @@
+/* =========================================================
+   DOCUMENT PREVIEW
+========================================================= */
+
+.document-preview {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 0;
+  max-height: 100%;
+
+  overflow: hidden;
+
+  border-radius: 22px;
+
+  background: #292929;
+
+  font-family:
+    "Urbanist",
+    sans-serif;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   REACT PDF DOCUMENT
+========================================================= */
+
+.document-preview .react-pdf__Document {
+  width: 100%;
+  height: 100%;
+}
+
+
+/* =========================================================
+   MAIN VIEWER
+========================================================= */
+
+.document-viewer {
+  display: flex;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.document-sidebar {
+  flex: 0 0 190px;
+  width: 190px;
+  height: 100%;
+
+  box-sizing: border-box;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background: #242424;
+
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+
+  scrollbar-width: auto;
+  scrollbar-color: #777 #242424;
+}
+
+
+/* Chrome / Edge scrollbar */
+
+.document-sidebar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.document-sidebar::-webkit-scrollbar-track {
+  background: #242424;
+}
+
+.document-sidebar::-webkit-scrollbar-thumb {
+  background: #777;
+
+  border-radius: 999px;
+  border: 2px solid #242424;
+}
+
+
+/* =========================================================
+   THUMBNAILS CONTAINER
+========================================================= */
+
+.document-thumbnails {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 16px;
+
+  padding: 20px 10px 80px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   THUMBNAIL
+========================================================= */
+
+.document-thumbnail {
+  flex: 0 0 auto;
+
+  width: 145px;
+
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border: 2px solid transparent;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+.document-thumbnail:hover {
+  border-color: #1688ff;
+}
+
+.document-thumbnail.active {
+  border-color: #1688ff;
+}
+
+
+/* =========================================================
+   THUMBNAIL PAGE
+========================================================= */
+
+.document-thumbnail-page {
+  width: 100%;
+
+  overflow: hidden;
+
+  display: flex;
+  justify-content: center;
+
+  background: #ffffff;
+}
+
+.document-thumbnail-page .react-pdf__Page {
+  flex: 0 0 auto;
+}
+
+.document-thumbnail-page canvas {
+  display: block;
+}
+
+
+/* =========================================================
+   THUMBNAIL NUMBER
+========================================================= */
+
+.document-thumbnail-number {
+  width: 100%;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #242424;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  line-height: 1;
+}
+
+
+/* =========================================================
+   MAIN PDF AREA
+========================================================= */
+
+.document-main {
+  position: relative;
+
+  flex: 1 1 0;
+
+  min-width: 0;
+  min-height: 0;
+
+  height: 100%;
+
+  background: #272727;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   PDF PAGE SCROLL
+========================================================= */
+
+.document-page-scroll {
+  width: 100%;
+  height: 100%;
+
+  overflow: auto;
+
+  box-sizing: border-box;
+
+  padding: 35px 70px 100px;
+
+  scrollbar-width: auto;
+  scrollbar-color: #777 #272727;
+}
+
+
+/* Chrome / Edge scrollbar */
+
+.document-page-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.document-page-scroll::-webkit-scrollbar-track {
+  background: #272727;
+}
+
+.document-page-scroll::-webkit-scrollbar-thumb {
+  background: #777;
+
+  border-radius: 999px;
+  border: 2px solid #272727;
+}
+
+
+/* =========================================================
+   PDF PAGE STAGE
+========================================================= */
+
+.document-page-stage {
+  width: max-content;
+  min-width: 100%;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: flex-start;
+
+  box-sizing: border-box;
+
+  padding-bottom: 20px;
+}
+
+
+/* =========================================================
+   PDF PAGE
+========================================================= */
+
+.document-page-stage .react-pdf__Page {
+  flex: 0 0 auto;
+
+  position: relative;
+
+  background: #ffffff;
+
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
+}
+
+.document-page-stage canvas {
+  display: block;
+}
+
+
+/* =========================================================
+   FULLSCREEN BUTTON
+========================================================= */
+
+.document-fullscreen-button {
+  position: absolute;
+
+  top: 14px;
+  right: 14px;
+
+  z-index: 50;
+
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 10px;
+
+  background: rgba(70, 70, 70, 0.85);
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(8px);
+}
+
+.document-fullscreen-button:hover {
+  background: rgba(90, 90, 90, 0.95);
+}
+
+.document-fullscreen-button svg {
+  width: 18px;
+  height: 18px;
+
+  display: block;
+}
+
+
+/* =========================================================
+   DOCUMENT CONTROL BAR
+========================================================= */
+
+.document-controls {
+  position: absolute;
+
+  left: 50%;
+  bottom: 22px;
+
+  z-index: 999;
+
+  transform: translateX(-50%);
+
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  padding: 0 10px;
+
+  border-radius: 999px;
+
+  background: rgba(70, 70, 70, 0.94);
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+  backdrop-filter: blur(10px);
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   DOCUMENT CONTROL BUTTON
+========================================================= */
+
+.document-control-button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 30px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+.document-control-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.document-control-button:disabled {
+  opacity: 0.3;
+}
+
+.document-control-button svg {
+  width: 17px;
+  height: 17px;
+
+  display: block;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   PAGE COUNTER
+========================================================= */
+
+.document-page-counter {
+  min-width: 38px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff !important;
+
+  font-family: "Urbanist", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+
+  text-align: center;
+  white-space: nowrap;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ZOOM VALUE
+========================================================= */
+
+.document-zoom-value {
+  min-width: 42px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff !important;
+
+  font-family: "Urbanist", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+
+  text-align: center;
+  white-space: nowrap;
+
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   CONTROL DIVIDER
+========================================================= */
+
+.document-control-divider {
+  width: 1px;
+  height: 20px;
+
+  margin: 0 5px;
+
+  flex: 0 0 1px;
+
+  background: rgba(255, 255, 255, 0.28);
+}
+
+
+/* =========================================================
+   FIT BUTTON
+========================================================= */
+
+.document-fit-button {
+  height: 30px;
+
+  padding: 0 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  font-family: "Urbanist", sans-serif;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+.document-fit-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.document-loading {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #aaaaaa;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.document-error {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #aaaaaa;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+.document-preview:fullscreen {
+  width: 100vw;
+  height: 100vh;
+
+  max-height: none;
+
+  border-radius: 0;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
+  .document-sidebar {
+    flex-basis: 150px;
+    width: 150px;
+  }
+
+  .document-thumbnail {
+    width: 115px;
+  }
+
+  .document-page-scroll {
+    padding-left: 35px;
+    padding-right: 35px;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .document-sidebar {
+    flex-basis: 120px;
+    width: 120px;
+  }
+
+  .document-thumbnail {
+    width: 95px;
+  }
+
+  .document-thumbnails {
+    gap: 12px;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .document-page-scroll {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .document-controls {
+    bottom: 15px;
+  }
+}

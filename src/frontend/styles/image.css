@@ -1,0 +1,771 @@
+/* =========================================================
+   ARCHIO IMAGE PREVIEW
+========================================================= */
+
+.image-preview {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 22px;
+
+  background: #ffffff;
+
+  cursor: default;
+
+  transition:
+    background-color 0.2s ease;
+}
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+.image-preview:fullscreen {
+  width: 100vw;
+  height: 100vh;
+
+  border-radius: 0;
+
+  background: #111111;
+}
+
+
+.image-preview-fullscreen {
+  cursor: default;
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.image-preview-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  max-width: none;
+  max-height: none;
+
+  pointer-events: none;
+
+  transform-origin: center center;
+
+  will-change: transform;
+}
+
+
+.image-preview-image-dragging {
+  cursor: grabbing;
+}
+
+
+/* =========================================================
+   FULLSCREEN BUTTON
+========================================================= */
+
+.image-fullscreen-button {
+  position: absolute;
+
+  top: 16px;
+  right: 16px;
+
+  z-index: 20;
+
+  width: 40px;
+  height: 40px;
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background:
+    rgba(
+      0,
+      0,
+      0,
+      0.48
+    );
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(8px);
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+
+.image-fullscreen-button:hover {
+  background:
+    rgba(
+      0,
+      0,
+      0,
+      0.68
+    );
+}
+
+
+.image-fullscreen-button:active {
+  transform:
+    scale(0.94);
+}
+
+
+.image-fullscreen-button svg {
+  width: 20px;
+  height: 20px;
+
+  display: block;
+}
+
+
+/* =========================================================
+   ZOOM CONTROLS
+========================================================= */
+
+.image-preview-controls {
+  position: absolute;
+
+  left: 50%;
+
+  bottom: 22px;
+
+  transform:
+    translateX(-50%);
+
+  z-index: 20;
+
+  height: 44px;
+
+  padding: 0 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  border-radius: 24px;
+
+  background:
+    rgba(
+      54,
+      54,
+      54,
+      0.88
+    );
+
+  color: #ffffff;
+
+  backdrop-filter: blur(8px);
+
+  box-sizing: border-box;
+}
+
+
+.image-preview-control-button,
+.image-preview-fit-button {
+  border: none;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  font-family: inherit;
+}
+
+
+.image-preview-control-button {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  font-size: 23px;
+
+  font-weight: 400;
+
+  line-height: 1;
+}
+
+
+.image-preview-control-button:hover,
+.image-preview-fit-button:hover {
+  color: #dddddd;
+}
+
+
+.image-preview-control-button:disabled {
+  opacity: 0.4;
+
+  cursor: default;
+}
+
+
+.image-preview-zoom {
+  min-width: 42px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+
+.image-preview-control-divider {
+  width: 1px;
+  height: 22px;
+
+  margin: 0 7px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.4
+    );
+}
+
+
+.image-preview-fit-button {
+  padding: 0 7px;
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   VECTOR PREVIEW
+========================================================= */
+
+.vector-preview-loading,
+.vector-preview-error {
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  border-radius: 22px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  text-align: center;
+
+  overflow: hidden;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+
+/* =========================================================
+   VECTOR LOADING
+========================================================= */
+
+.vector-preview-loading {
+  gap: 14px;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  color: #777777;
+}
+
+
+.vector-preview-spinner {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 30px;
+
+  border: 3px solid rgba(
+    0,
+    0,
+    0,
+    0.12
+  );
+
+  border-top-color: #555555;
+
+  border-radius: 50%;
+
+  box-sizing: border-box;
+
+  animation:
+    archio-vector-spinner
+    0.8s
+    linear
+    infinite;
+}
+
+
+@keyframes archio-vector-spinner {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =========================================================
+   VECTOR ERROR
+========================================================= */
+
+.vector-preview-error {
+  padding: 32px;
+}
+
+
+.vector-preview-error-icon {
+  width: 48px;
+  height: 48px;
+
+  margin-bottom: 16px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #888888;
+}
+
+
+.vector-preview-error-icon svg {
+  width: 42px;
+  height: 42px;
+
+  display: block;
+}
+
+
+.vector-preview-error-title {
+  margin: 0 0 7px;
+
+  color: #222222;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  line-height: 1.3;
+}
+
+
+.vector-preview-error-text {
+  max-width: 520px;
+
+  color: #777777;
+
+  font-size: 13px;
+
+  font-weight: 500;
+
+  line-height: 1.5;
+}
+
+
+.vector-preview-error-detail {
+  max-width: 620px;
+
+  margin-top: 12px;
+
+  color: #aaaaaa;
+
+  font-size: 11px;
+
+  font-weight: 400;
+
+  line-height: 1.5;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   LIGHT THEME
+========================================================= */
+
+html[data-theme="light"] .image-preview,
+html:not([data-theme="dark"]) .image-preview {
+
+  background: #ffffff;
+
+}
+
+
+html[data-theme="light"] .image-preview-error,
+html:not([data-theme="dark"]) .image-preview-error {
+
+  background: #ffffff;
+
+}
+
+
+html[data-theme="light"] .image-preview-error h3,
+html:not([data-theme="dark"]) .image-preview-error h3 {
+
+  color: #222222;
+
+}
+
+
+/* =========================================================
+   VECTOR LIGHT THEME
+========================================================= */
+
+html[data-theme="light"] .vector-preview-loading,
+html:not([data-theme="dark"]) .vector-preview-loading {
+
+  background: #ffffff;
+
+  color: #777777;
+
+}
+
+
+html[data-theme="light"] .vector-preview-error,
+html:not([data-theme="dark"]) .vector-preview-error {
+
+  background: #ffffff;
+
+  color: #222222;
+
+}
+
+
+html[data-theme="light"] .vector-preview-error-title,
+html:not([data-theme="dark"]) .vector-preview-error-title {
+
+  color: #222222;
+
+}
+
+
+html[data-theme="light"] .vector-preview-error-text,
+html:not([data-theme="dark"]) .vector-preview-error-text {
+
+  color: #777777;
+
+}
+
+
+html[data-theme="light"] .vector-preview-error-detail,
+html:not([data-theme="dark"]) .vector-preview-error-detail {
+
+  color: #aaaaaa;
+
+}
+
+
+html[data-theme="light"] .vector-preview-spinner,
+html:not([data-theme="dark"]) .vector-preview-spinner {
+
+  border-color:
+    rgba(
+      0,
+      0,
+      0,
+      0.12
+    );
+
+  border-top-color: #555555;
+
+}
+
+
+/* =========================================================
+   DARK THEME
+========================================================= */
+
+html[data-theme="dark"] .image-preview {
+
+  background: #292929;
+
+}
+
+
+html[data-theme="dark"] .image-preview-error {
+
+  background: #292929;
+
+  color: #aaaaaa;
+
+}
+
+
+html[data-theme="dark"] .image-preview-error h3 {
+
+  color: #f3f3f3;
+
+}
+
+
+html[data-theme="dark"] .image-preview-error p {
+
+  color: #a0a0a0;
+
+}
+
+
+html[data-theme="dark"] .image-preview-error-icon {
+
+  color: #8d8d8d;
+
+}
+
+
+/* =========================================================
+   VECTOR DARK THEME
+========================================================= */
+
+html[data-theme="dark"] .vector-preview-loading,
+html[data-theme="dark"] .vector-preview-error {
+
+  background: #292929;
+
+}
+
+
+html[data-theme="dark"] .vector-preview-loading {
+
+  color: #aaaaaa;
+
+}
+
+
+html[data-theme="dark"] .vector-preview-error {
+
+  color: #aaaaaa;
+
+}
+
+
+html[data-theme="dark"] .vector-preview-error-icon {
+
+  color: #8d8d8d;
+
+}
+
+
+html[data-theme="dark"] .vector-preview-error-title {
+
+  color: #f3f3f3;
+
+}
+
+
+html[data-theme="dark"] .vector-preview-error-text {
+
+  color: #a0a0a0;
+
+}
+
+
+html[data-theme="dark"] .vector-preview-error-detail {
+
+  color: #777777;
+
+}
+
+
+html[data-theme="dark"] .vector-preview-spinner {
+
+  border-color:
+    rgba(
+      255,
+      255,
+      255,
+      0.14
+    );
+
+  border-top-color: #dddddd;
+
+}
+
+
+/* =========================================================
+   FULLSCREEN VECTOR PREVIEW
+========================================================= */
+
+.vector-preview-loading:fullscreen,
+.vector-preview-error:fullscreen {
+
+  width: 100vw;
+  height: 100vh;
+
+  border-radius: 0;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+  .image-preview {
+    border-radius: 16px;
+  }
+
+
+  .image-fullscreen-button {
+    top: 12px;
+    right: 12px;
+
+    width: 36px;
+    height: 36px;
+  }
+
+
+  .image-fullscreen-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+
+  .image-preview-controls {
+    bottom: 14px;
+
+    height: 40px;
+  }
+
+
+  .vector-preview-loading,
+  .vector-preview-error {
+
+    border-radius: 16px;
+
+  }
+
+
+  .vector-preview-error {
+
+    padding: 24px;
+
+  }
+
+
+  .vector-preview-error-icon {
+
+    width: 42px;
+    height: 42px;
+
+    margin-bottom: 12px;
+
+  }
+
+
+  .vector-preview-error-icon svg {
+
+    width: 36px;
+    height: 36px;
+
+  }
+
+
+  .vector-preview-error-title {
+
+    font-size: 15px;
+
+  }
+
+
+  .vector-preview-error-text {
+
+    font-size: 12px;
+
+  }
+
+
+  .vector-preview-error-detail {
+
+    max-width: calc(100% - 20px);
+
+    font-size: 10px;
+
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .vector-preview-spinner {
+
+    animation: none;
+
+  }
+
+
+  .image-preview,
+  .image-preview-error,
+  .vector-preview-loading,
+  .vector-preview-error {
+
+    transition: none;
+
+  }
+
+}

@@ -1,0 +1,104 @@
+/* =========================================================
+   ARCHIO - SHARED PREVIEW CONTROLS
+   Dipakai oleh:
+   - ImagePreview
+   - VideoPreview
+   - DocumentPreview
+   - PresentationPreview
+========================================================= */
+
+.archio-fullscreen-button {
+  position: absolute;
+
+  top: 14px;
+  right: 14px;
+
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 9px;
+
+  background: rgba(70, 70, 70, 0.82);
+
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  z-index: 100;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  box-sizing: border-box;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.archio-fullscreen-button:hover {
+  background: rgba(95, 95, 95, 0.95);
+}
+
+.archio-fullscreen-button:active {
+  transform: scale(0.94);
+}
+
+.archio-fullscreen-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+.archio-fullscreen-button svg {
+  width: 18px;
+  height: 18px;
+
+  display: block;
+
+  flex: 0 0 18px;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+.archio-fullscreen-button:fullscreen {
+  background: rgba(70, 70, 70, 0.82);
+}
+
+/*
+ * Saat container masuk fullscreen,
+ * tombol tetap berada di pojok kanan atas.
+ */
+
+:fullscreen .archio-fullscreen-button {
+  top: 18px;
+  right: 18px;
+}
+
+/*
+ * Background umum untuk preview fullscreen.
+ */
+
+:fullscreen {
+  background: #272727;
+}
+
+/* =========================================================
+   SAFETY
+========================================================= */
+
+.archio-fullscreen-button *,
+.archio-fullscreen-button svg {
+  box-sizing: border-box;
+}
